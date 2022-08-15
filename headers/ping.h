@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/15 16:06:46 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/15 16:53:45 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "libft.h"
 
+#include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -53,6 +54,16 @@ struct in_addr {
 	unsigned long s_addr;  // load with inet_aton()
 };
 */
+
+typedef struct	s_data {
+	char ipv4[INET_ADDRSTRLEN];
+	char ipv6[INET6_ADDRSTRLEN];
+	struct addrinfo *host_info;
+	char *address;
+}	t_data;
+
+/* global */
+extern t_data g_data;
 
 /* signal.c */
 void inthandler(int sig);
