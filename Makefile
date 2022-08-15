@@ -6,7 +6,7 @@
 #    By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/12/22 14:06:43 by lumenthi          #+#    #+#              #
-#    Updated: 2022/08/15 13:03:09 by lumenthi         ###   ########.fr        #
+#    Updated: 2022/08/15 14:45:10 by lumenthi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,7 +50,8 @@ HEADERS = $(addprefix $(HEADDIR)/, $(HEADS))
 
 ###### SOURCES ######
 
-SRCS = ping.c
+SRCS = ping.c \
+	signal.c
 
 SOURCES = $(addprefix $(SRCDIR)/, $(SRCS))
 
@@ -102,3 +103,6 @@ fclean: clean
 
 re: fclean # Make -j support
 	@ $(MAKE) all
+
+run: all
+	./$(NAME) localhost
