@@ -6,7 +6,7 @@
 #    By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/12/22 14:06:43 by lumenthi          #+#    #+#              #
-#    Updated: 2022/08/15 14:45:10 by lumenthi         ###   ########.fr        #
+#    Updated: 2022/08/15 17:05:58 by lumenthi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -105,4 +105,4 @@ re: fclean # Make -j support
 	@ $(MAKE) all
 
 run: all
-	./$(NAME) localhost
+	@./$(NAME) localhost
