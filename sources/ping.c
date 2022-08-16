@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/16 17:20:09 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/16 19:10:15 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,55 +123,82 @@ void print_begin()
 	ft_putstr(") 56(84) bytes of data.\n");
 }
 
-void ping_loop()
+void print_end()
+{
+	struct timeval end_time;
+	gettimeofday(&end_time, NULL);
+	unsigned int diff = end_time.tv_usec - g_data.start_time.tv_usec;
+
+	printf("\n--- %s ping statistics ---\n", g_data.address);
+	printf("%d packets transmitted, %d received, %d%c packet loss, time %dms\n",
+		g_data.sent, g_data.rec,
+		(g_data.sent-g_data.rec) / g_data.rec, '%', diff);
+}
+
+void process_packet()
 {
 	t_packet		packet;
-	unsigned int	packet_nbr;
 	struct sockaddr	receiver;
 	socklen_t		receiver_len;
 	struct timeval	start_time;
 
+	/* For debug */
+	if (g_data.seq > 2)
+		inthandler(2);
 
+	/* Formatting packet header */
+	ft_memset(&packet, 0, sizeof(packet));
+	packet.hdr.type = ICMP_ECHO;
+	packet.hdr.un.echo.id = getpid();
+	packet.hdr.un.echo.sequence = g_data.seq++;
+	packet.hdr.checksum = checksum(&packet, sizeof(packet));
+
+	/* Preparing receiver */
+	receiver_len = sizeof(receiver);
+
+	/* debug_packet(packet); */
+	if (sendto(g_data.sockfd,
+				&packet,
+				sizeof(packet),
+				0,
+				g_data.host_addr,
+				sizeof(*(g_data.host_addr))) <= 0)
+	{
+		fprintf(stderr, "Failed to send packet\n");
+	}
+	else
+		g_data.sent++;
+
+	/* Prepare timer */
+	gettimeofday(&start_time, NULL); /* TODO: CHECK RET FOR TIMEOFDAY */
+
+	if (recvfrom(g_data.sockfd,
+				&packet,
+				sizeof(packet),
+				0,
+				&receiver,
+				&receiver_len) <= 0 && g_data.seq > 0)
+	{
+		fprintf(stderr, "Failed to receive packet\n");
+	}
+	else
+		g_data.rec++;
+	print_packet(packet, g_data.seq, start_time);
+	alarm(1);
+}
+
+void ping_loop()
+{
+	g_data.seq = 0;
+	g_data.rec = 0;
+	g_data.sent = 0;
+	gettimeofday(&(g_data.start_time), NULL);
+	signal(SIGALRM, alarmhandler);
 	signal(SIGINT, inthandler);
 
-	int i = 50;
-	packet_nbr = 0;
 	print_begin();
-	while (i) {
-		/* Prepare timer */
-		gettimeofday(&start_time, NULL);
-		/* Formatting packet header */
-		ft_memset(&packet, 0, sizeof(packet));
-		packet.hdr.type = ICMP_ECHO;
-		packet.hdr.un.echo.id = getpid();
-		packet.hdr.un.echo.sequence = packet_nbr++;
-		packet.hdr.checksum = checksum(&packet, sizeof(packet));
-
-		/* Preparing receiver */
-		receiver_len = sizeof(receiver);
-
-		/* debug_packet(packet); */
-		if (sendto(g_data.sockfd,
-					&packet,
-					sizeof(packet),
-					0,
-					g_data.host_addr,
-					sizeof(*(g_data.host_addr))) <= 0)
-		{
-			fprintf(stderr, "Failed to send packet\n");
-		}
-		if (recvfrom(g_data.sockfd,
-					&packet,
-					sizeof(packet),
-					0,
-					&receiver,
-					&receiver_len) <= 0 && packet_nbr > 0)
-		{
-			fprintf(stderr, "Failed to receive packet\n");
-		}
-		print_packet(packet, packet_nbr, start_time);
-		i--;
-	}
+	process_packet();
+	while (1);
 }
 
 int ft_ping(char *path, char *address)

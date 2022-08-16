@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/16 17:18:11 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/16 18:53:48 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "libft.h"
 
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
@@ -66,7 +67,11 @@ typedef struct	s_data {
 	char ipv6[INET6_ADDRSTRLEN];
 	struct addrinfo *host_info;
 	struct sockaddr *host_addr;
+	struct timeval start_time;
 	char *address;
+	unsigned int seq;
+	unsigned int sent;
+	unsigned int rec;
 	int sockfd;
 	int ttl;
 }	t_data;
@@ -76,6 +81,11 @@ extern t_data g_data;
 
 /* signal.c */
 void inthandler(int sig);
+void alarmhandler(int sig);
+
+/* ping.c */
+void process_packet();
+void print_end();
 
 /* Packets */
 #include <netinet/ip_icmp.h>
