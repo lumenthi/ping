@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/15 19:04:52 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/16 14:38:30 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,41 +32,81 @@ static struct addrinfo *resolve(char *host)
 
 static int host_informations(struct addrinfo *ret)
 {
-	struct addrinfo *tmp = ret;
-	while (tmp) {
-		if (tmp->ai_family == AF_INET) {
-			if (!(inet_ntop(AF_INET,
-					&((const struct sockaddr_in *)tmp->ai_addr)->sin_addr,
-					g_data.ipv4, sizeof(g_data.ipv4)))) {
-				return 1;
-			}
-			else {
-				g_data.host_addr = tmp->ai_addr;
-				return 0;
-			}
-		}
-		tmp = tmp->ai_next;
+	if (!(inet_ntop(AF_INET,
+					&((const struct sockaddr_in *)ret->ai_addr)->sin_addr,
+					g_data.ipv4,
+					sizeof(g_data.ipv4))))
+	{
+		return 1;
+	}
+	else {
+		g_data.host_addr = ret->ai_addr;
+		return 0;
 	}
 	return 0;
 }
 
+unsigned short checksum(void *b, int len)
+{
+	unsigned short *buf = b;
+	unsigned int sum=0;
+	unsigned short result;
+
+	for ( sum = 0; len > 1; len -= 2 )
+		sum += *buf++;
+	if ( len == 1 )
+		sum += *(unsigned char*)buf;
+	sum = (sum >> 16) + (sum & 0xFFFF);
+	sum += (sum >> 16);
+	result = ~sum;
+	return result;
+}
+
+void debug_packet(t_packet packet)
+{
+	printf("===========HEADER============\n");
+	printf("type: %d\ncode: %d\nchecksum: %d\n", packet.hdr.type, packet.hdr.code, packet.hdr.checksum);
+
+	printf("echo.id: %d\necho.sequence: %d\n", packet.hdr.un.echo.id, packet.hdr.un.echo.sequence);
+
+	printf("gateway: %d\n", packet.hdr.un.gateway);
+
+	printf("frag.mtu: %d\n", packet.hdr.un.frag.mtu);
+
+	printf("==========MESSAGE==========\n");
+	printf("%s\n", packet.msg);
+}
+
 void ping_loop()
 {
-	struct icmphdr	packet_hdr;
 	t_packet		packet;
+	int				packet_nbr;
 
 	signal(SIGINT, inthandler);
 
 	printf("PING %s (%s) 56(84) bytes of data.\n", g_data.address, g_data.ipv4);
-	while (1) {
-		/* Formatting packet */
-		ft_memset(&packet_hdr, 0, sizeof(struct icmphdr));
-		packet_hdr.type = ICMP_ECHO;
-		packet_hdr.un.echo.id = getpid();
-		if (sendto(g_data.sockfd, &packet, sizeof(packet), 0,
-			g_data.host_addr, sizeof(g_data.host_addr)) <= 0) {
-			/* Packet failed */
+
+	int i = 1;
+	packet_nbr = 0;
+	while (i) {
+		/* Formatting packet header */
+		ft_memset(&packet, 0, sizeof(packet));
+		packet.hdr.type = ICMP_ECHO;
+		packet.hdr.un.echo.id = getpid();
+		packet.hdr.un.echo.sequence = packet_nbr++;
+		packet.hdr.checksum = checksum(&packet, sizeof(packet));
+
+		debug_packet(packet);
+		if (sendto(g_data.sockfd,
+					&packet,
+					sizeof(packet),
+					0,
+					g_data.host_addr,
+					sizeof(*(g_data.host_addr))) <= 0)
+		{
+			fprintf(stderr, "Failed to send packet\n");
 		}
+		i--;
 	}
 }
 
@@ -81,8 +121,8 @@ int ft_ping(char *path, char *address)
 
 	g_data.address = address;
 	/* Socket creation RAW/DGRAM ? */
-	if ((g_data.sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP)) < 0) {
-		fprintf(stderr, "%s: %s: Failed to create the socket\n", path, address);
+	if ((g_data.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
+		fprintf(stderr, "%s: %s: Failed to create socket\n", path, address);
 		return 1;
 	}
 	/* Resolving host */

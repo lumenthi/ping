@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/15 19:08:11 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/16 14:30:41 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,11 @@ struct addrinfo {
 	struct sockaddr *ai_addr;
 	char            *ai_canonname;
 	struct addrinfo *ai_next;
+};
+
+struct sockaddr{
+	sa_family_t     sa_family;       address family
+	char            sa_data[];       socket address (variable-length data)
 };
 
 struct sockaddr_in {
@@ -103,6 +108,13 @@ typedef struct s_packet
 	char msg[64-sizeof(struct icmphdr)]; /* Define dynamically */
 }	t_packet;
 
-/* $ tcpdump ip proto -> to capture ping packets */
+/* NOTES:
+
+$ sudo tcpdump ip proto -> to capture ping packets
+$ sudo tcpdump -i lo -> to capture local ping packets
+$ vagrant rsync-auto -> to synchronize folder
+
+*/
+
 
 #endif
