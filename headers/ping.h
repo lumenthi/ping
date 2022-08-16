@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/16 14:30:41 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/16 17:18:11 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ typedef struct	s_data {
 	struct sockaddr *host_addr;
 	char *address;
 	int sockfd;
+	int ttl;
 }	t_data;
 
 /* global */
@@ -113,6 +114,8 @@ typedef struct s_packet
 $ sudo tcpdump ip proto -> to capture ping packets
 $ sudo tcpdump -i lo -> to capture local ping packets
 $ vagrant rsync-auto -> to synchronize folder
+
+The default is to wait for one second between each packet normally
 
 */
 

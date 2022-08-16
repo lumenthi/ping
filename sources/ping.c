@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/16 16:20:49 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/16 17:20:09 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,20 +88,58 @@ void debug_packet(t_packet packet)
 	printf("%s\n", packet.msg);
 }
 
+void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start_time)
+{
+	struct timeval end_time;
+
+	gettimeofday(&end_time, NULL);
+
+	int sec = end_time.tv_sec - start_time.tv_sec;
+	int msec = end_time.tv_usec - start_time.tv_usec;
+
+	ft_putnbr(sizeof(packet));
+	ft_putstr(" bytes from ");
+	ft_putstr(g_data.address);
+	ft_putstr(" (");
+	ft_putstr(g_data.ipv4);
+	ft_putstr("): icmp_seq=");
+	ft_putnbr(packet_nbr);
+	ft_putstr(" ttl=");
+	ft_putnbr(g_data.ttl);
+	ft_putstr(" time=");
+	ft_putnbr(sec);
+	ft_putstr(".");
+	ft_putnbr(msec);
+	ft_putstr("ms");
+	ft_putchar('\n');
+}
+
+void print_begin()
+{
+	ft_putstr("PING ");
+	ft_putstr(g_data.address);
+	ft_putstr(" (");
+	ft_putstr(g_data.ipv4);
+	ft_putstr(") 56(84) bytes of data.\n");
+}
+
 void ping_loop()
 {
 	t_packet		packet;
-	int				packet_nbr;
+	unsigned int	packet_nbr;
 	struct sockaddr	receiver;
 	socklen_t		receiver_len;
+	struct timeval	start_time;
+
 
 	signal(SIGINT, inthandler);
 
-	printf("PING %s (%s) 56(84) bytes of data.\n", g_data.address, g_data.ipv4);
-
-	int i = 3;
+	int i = 50;
 	packet_nbr = 0;
+	print_begin();
 	while (i) {
+		/* Prepare timer */
+		gettimeofday(&start_time, NULL);
 		/* Formatting packet header */
 		ft_memset(&packet, 0, sizeof(packet));
 		packet.hdr.type = ICMP_ECHO;
@@ -131,6 +169,7 @@ void ping_loop()
 		{
 			fprintf(stderr, "Failed to receive packet\n");
 		}
+		print_packet(packet, packet_nbr, start_time);
 		i--;
 	}
 }
@@ -138,7 +177,7 @@ void ping_loop()
 int ft_ping(char *path, char *address)
 {
 	/* default TTL */
-	int ttl = 64;
+	g_data.ttl = 64;
 	/* default timeout (seconds) */
 	struct timeval timeout;
 	timeout.tv_sec = 1;
@@ -163,7 +202,7 @@ int ft_ping(char *path, char *address)
 		return 1;
 	}
 	/* Setting TTL option */
-	if (setsockopt(g_data.sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) != 0) {
+	if (setsockopt(g_data.sockfd, IPPROTO_IP, IP_TTL, &g_data.ttl, sizeof(g_data.ttl)) != 0) {
 		fprintf(stderr, "%s: %s: Failed to set TTL option\n", path, address);
 		freeaddrinfo(g_data.host_info);
 		return 1;
