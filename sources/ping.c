@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/16 14:38:30 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/16 16:20:49 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,16 +48,27 @@ static int host_informations(struct addrinfo *ret)
 
 unsigned short checksum(void *b, int len)
 {
-	unsigned short *buf = b;
-	unsigned int sum=0;
-	unsigned short result;
+	unsigned short	*buf = b;
+	unsigned int	sum = 0;
+	unsigned short	result;
 
-	for ( sum = 0; len > 1; len -= 2 )
+	/* Sum up 2-byte values until none or only one byte left. */
+	while (len > 1) {
 		sum += *buf++;
-	if ( len == 1 )
+		len -= 2;
+	}
+
+	/* Add left-over byte, if any. */
+	if (len == 1)
 		sum += *(unsigned char*)buf;
-	sum = (sum >> 16) + (sum & 0xFFFF);
-	sum += (sum >> 16);
+
+	/* Fold 32-bit sum into 16 bits; we lose information by doing this,
+		increasing the chances of a collision.
+		sum = (lower 16 bits) + (upper 16 bits shifted right 16 bits)*/
+	while (sum >> 16)
+		sum = (sum & 0xffff) + (sum >> 16);
+
+	/* Checksum is one's compliment of sum. */
 	result = ~sum;
 	return result;
 }
@@ -81,12 +92,14 @@ void ping_loop()
 {
 	t_packet		packet;
 	int				packet_nbr;
+	struct sockaddr	receiver;
+	socklen_t		receiver_len;
 
 	signal(SIGINT, inthandler);
 
 	printf("PING %s (%s) 56(84) bytes of data.\n", g_data.address, g_data.ipv4);
 
-	int i = 1;
+	int i = 3;
 	packet_nbr = 0;
 	while (i) {
 		/* Formatting packet header */
@@ -96,7 +109,10 @@ void ping_loop()
 		packet.hdr.un.echo.sequence = packet_nbr++;
 		packet.hdr.checksum = checksum(&packet, sizeof(packet));
 
-		debug_packet(packet);
+		/* Preparing receiver */
+		receiver_len = sizeof(receiver);
+
+		/* debug_packet(packet); */
 		if (sendto(g_data.sockfd,
 					&packet,
 					sizeof(packet),
@@ -105,6 +121,15 @@ void ping_loop()
 					sizeof(*(g_data.host_addr))) <= 0)
 		{
 			fprintf(stderr, "Failed to send packet\n");
+		}
+		if (recvfrom(g_data.sockfd,
+					&packet,
+					sizeof(packet),
+					0,
+					&receiver,
+					&receiver_len) <= 0 && packet_nbr > 0)
+		{
+			fprintf(stderr, "Failed to receive packet\n");
 		}
 		i--;
 	}
