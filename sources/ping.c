@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 14:37:04 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 15:16:36 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,10 +206,28 @@ void print_end()
 
 	long long diff = end_ms - start_ms;
 
-	printf("\n--- %s ping statistics ---\n", g_data.address);
-	printf("%d packets transmitted, %d received, %d%c packet loss, time %lldms\n",
-		g_data.sent, g_data.rec,
-		(g_data.sent-g_data.rec) / g_data.rec, '%', diff);
+	int average;
+	if (g_data.rec == 0) {
+		if (g_data.sent == 0)
+			average = 0;
+		else
+			average = 100;
+	}
+	else
+		average = ((float)(g_data.sent - g_data.rec) / (float)g_data.sent) * 100.0;
+
+	ft_putstr("\n--- ");
+	ft_putstr(g_data.address);
+	ft_putstr(" ping statistics ---\n");
+
+	ft_putnbr(g_data.sent);
+	ft_putstr(" packets transmitted, ");
+	ft_putnbr(g_data.rec);
+	ft_putstr(" received, ");
+	ft_putnbr(average);
+	ft_putstr("% packet loss, time ");
+	ft_putnbr(diff);
+	ft_putstr("ms\n");
 }
 
 void process_packet()
@@ -218,10 +236,14 @@ void process_packet()
 	struct sockaddr	receiver;
 	socklen_t		receiver_len;
 	struct timeval	start_time;
+	int				received;
 
 	/* For debug */
 	if (g_data.seq > 500)
 		inthandler(2);
+
+	/* Set our receive flag to 0 */
+	received = 0;
 
 	/* Formatting packet header */
 	ft_memset(&packet, 0, sizeof(packet));
@@ -256,11 +278,13 @@ void process_packet()
 				&receiver,
 				&receiver_len) <= 0 && g_data.seq > 0)
 	{
-		fprintf(stderr, "Failed to receive packet\n");
 	}
-	else
+	else {
+		received = 1;
 		g_data.rec++;
-	print_packet(packet, g_data.seq, start_time);
+	}
+	if (received)
+		print_packet(packet, g_data.seq, start_time);
 	alarm(1);
 }
 
