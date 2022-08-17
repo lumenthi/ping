@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 16:05:23 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 17:42:44 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ struct in_addr {
 
 typedef struct	s_data {
 	uint8_t args;
+	char *path;
 	char ipv4[INET_ADDRSTRLEN];
 	char ipv6[INET6_ADDRSTRLEN];
 	struct addrinfo *host_info;
@@ -139,6 +140,15 @@ ADDRESSES:
 69.162.81.155 -> 110ms
 95.142.107.181 -> 8.90ms
 152.99.1.10 -> Timeout
+
+
+TODO: RTT line
+64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.022 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=2 ttl=64 time=0.046 ms
+^C
+--- localhost ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1030ms
+rtt min/avg/max/mdev = 0.022/0.034/0.046/0.012 ms <--- This line
 
 */
 

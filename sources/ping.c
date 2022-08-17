@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 16:52:08 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 17:48:55 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,9 @@ static struct addrinfo *resolve(char *host)
 static int host_informations(struct addrinfo *ret)
 {
 	if (!(inet_ntop(AF_INET,
-					&((const struct sockaddr_in *)ret->ai_addr)->sin_addr,
-					g_data.ipv4,
-					sizeof(g_data.ipv4))))
+		&((const struct sockaddr_in *)ret->ai_addr)->sin_addr,
+		g_data.ipv4,
+		sizeof(g_data.ipv4))))
 	{
 		return 1;
 	}
@@ -196,6 +196,17 @@ void print_begin()
 	ft_putstr(") 56(84) bytes of data.\n");
 }
 
+void print_rtt()
+{
+	float min = 0.5;
+	float max = 0.5;
+	float avg = 0.5;
+	float mdev = 0.5;
+
+	printf("rtt min/avg/max/mdev = %.6f/%.6f/%.6f/%.6f ms\n",
+	min, avg, max, mdev);
+}
+
 void print_end()
 {
 	struct timeval end_time;
@@ -228,6 +239,7 @@ void print_end()
 	ft_putstr("% packet loss, time ");
 	ft_putnbr(diff);
 	ft_putstr("ms\n");
+	print_rtt();
 }
 
 void process_packet()
@@ -293,10 +305,14 @@ void ping_loop()
 	g_data.seq = 0;
 	g_data.rec = 0;
 	g_data.sent = 0;
-	gettimeofday(&(g_data.start_time), NULL);
 	signal(SIGALRM, alarmhandler);
 	signal(SIGINT, inthandler);
 
+	if (ARGS_V)
+		printf("%s: Capturing start time...\n", g_data.path);
+	gettimeofday(&(g_data.start_time), NULL);
+	if (ARGS_V)
+		printf("%s: Starting the ping loop...\n", g_data.path);
 	print_begin();
 	process_packet();
 	while (1);
@@ -317,7 +333,7 @@ int print_help()
 	return 0;
 }
 
-int ft_ping(char *path, char *address)
+int ft_ping(char *address)
 {
 	/* default TTL */
 	g_data.ttl = 64;
@@ -328,31 +344,41 @@ int ft_ping(char *path, char *address)
 
 	g_data.address = address;
 	/* Socket creation RAW/DGRAM ? */
+	if (ARGS_V)
+		printf("%s: Creating raw socket...\n", g_data.path);
 	if ((g_data.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
-		fprintf(stderr, "%s: %s: Failed to create socket\n", path, address);
+		fprintf(stderr, "%s: %s: Failed to create socket\n", g_data.path, address);
 		return 1;
 	}
 	/* Resolving host */
+	if (ARGS_V)
+		printf("%s: Resolving host...\n", g_data.path);
 	if (!(g_data.host_info = resolve(address))) {
-		fprintf(stderr, "%s: %s: Name or service not known\n", path, address);
+		fprintf(stderr, "%s: %s: Name or service not known\n", g_data.path, address);
 		return 1;
 	}
 	/* g_data.host_info is allocated ! Must free it now */
 	/* Getting informations about host */
+	if (ARGS_V)
+		printf("%s: Gathering informations about host...\n", g_data.path);
 	if (host_informations(g_data.host_info)) {
-		fprintf(stderr, "%s: %s: Failed to get informations about the host\n", path, address);
+		fprintf(stderr, "%s: %s: Failed to get informations about the host\n", g_data.path, address);
 		freeaddrinfo(g_data.host_info);
 		return 1;
 	}
 	/* Setting TTL option */
+	if (ARGS_V)
+		printf("%s: Setting TTL option to %d...\n", g_data.path, g_data.ttl);
 	if (setsockopt(g_data.sockfd, IPPROTO_IP, IP_TTL, &g_data.ttl, sizeof(g_data.ttl)) != 0) {
-		fprintf(stderr, "%s: %s: Failed to set TTL option\n", path, address);
+		fprintf(stderr, "%s: %s: Failed to set TTL option\n", g_data.path, address);
 		freeaddrinfo(g_data.host_info);
 		return 1;
 	}
 	/* Setting timeout option */
+	if (ARGS_V)
+		printf("%s: Setting timeout option to %ld...\n", g_data.path, timeout.tv_sec);
 	if (setsockopt(g_data.sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) != 0) {
-		fprintf(stderr, "%s: %s: Failed to set timeout option\n", path, address);
+		fprintf(stderr, "%s: %s: Failed to set timeout option\n", g_data.path, address);
 		freeaddrinfo(g_data.host_info);
 		return 1;
 	}
@@ -395,9 +421,11 @@ int main(int argc, char **argv)
 	if (ARGS_H)
 		return (print_help());
 
+	g_data.path = argv[0];
+
 	while (i < argc) {
 		if (argv[i] && argv[i][0] != '-')
-			ft_ping(argv[0], argv[i]);
+			ft_ping(argv[i]);
 		i++;
 	}
 	return 0;
