@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 13:57:36 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 14:37:04 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,7 @@ void print_time(long long ms, unsigned int sec, unsigned int usec)
 {
 	int nbr = 100;
 	long long ms2 = sec*1000 + usec/1000;
+	int zeroes = 2;
 
 	/*ft_putstr("ms: ");
 	ft_putnbr(ms);
@@ -129,11 +130,18 @@ void print_time(long long ms, unsigned int sec, unsigned int usec)
 			usec-=1000;
 		ft_putchar('.');
 		nbr = 10;
-		usec = usec*0.1;
-		while (nbr > 1) {
+		usec = ms > 9 ? usec*0.01 : usec*0.1;
+		while (nbr) {
 			if (!(usec / nbr))
-				ft_putchar('0');
+				zeroes++;
+			zeroes--;
 			nbr /= 10;
+		}
+		if (usec == 0)
+			zeroes -= 1;
+		while (zeroes > 0) {
+			ft_putchar('0');
+			zeroes--;
 		}
 		ft_putnbr(usec);
 	}
