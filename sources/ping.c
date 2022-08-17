@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 15:16:36 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 16:52:08 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,6 +302,21 @@ void ping_loop()
 	while (1);
 }
 
+int print_help()
+{
+	printf("Usage\n"
+		"  ping [options] <destination>\n\n"
+		"Options:\n"
+		"  <destination>      dns name or ip address\n"
+		"  -h                 print help and exit\n"
+		"  -v                 verbose output\n"
+		"  IPv4 options:\n"
+		"  -4                 use IPv4\n"
+		"  IPv6 options:\n"
+		"  -6                 use IPv6\n");
+	return 0;
+}
+
 int ft_ping(char *path, char *address)
 {
 	/* default TTL */
@@ -347,12 +362,43 @@ int ft_ping(char *path, char *address)
 	return 0;
 }
 
+void	get_args(int argc, char **argv, uint8_t *args)
+{
+	int i = 1;
+	int j = 0;
+	*args = 0x00;
+	while (i < argc) {
+		if (argv[i] && argv[i][0] == '-') {
+			j = 0;
+			while (argv[i][j]) {
+				if (argv[i][j] == 'v')
+					(*args) |= 0x01; // 0000 0001
+				else if (argv[i][j] == 'h')
+					(*args) |= 0x02; // 0000 0010
+				j++;
+			}
+		}
+		i++;
+	}
+}
+
 int main(int argc, char **argv)
 {
+	int i = 1;
 	if (argc < 2) {
 		fprintf(stderr, "%s: usage error: Destination address required\n", argv[0]);
 		return 1;
 	}
-	ft_ping(argv[0], argv[1]);
+
+	get_args(argc, argv, &g_data.args);
+
+	if (ARGS_H)
+		return (print_help());
+
+	while (i < argc) {
+		if (argv[i] && argv[i][0] != '-')
+			ft_ping(argv[0], argv[i]);
+		i++;
+	}
 	return 0;
 }

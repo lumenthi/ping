@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 14:41:44 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 16:05:23 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ struct in_addr {
 */
 
 typedef struct	s_data {
+	uint8_t args;
 	char ipv4[INET_ADDRSTRLEN];
 	char ipv6[INET6_ADDRSTRLEN];
 	struct addrinfo *host_info;
@@ -119,6 +120,9 @@ typedef struct s_packet
 	char msg[64-sizeof(struct icmphdr)]; /* Define dynamically */
 }	t_packet;
 
+# define ARGS_V g_data.args & 0x01
+# define ARGS_H g_data.args & 0x02
+
 /* NOTES:
 
 $ sudo tcpdump ip proto -> to capture ping packets
@@ -137,6 +141,5 @@ ADDRESSES:
 152.99.1.10 -> Timeout
 
 */
-
 
 #endif
