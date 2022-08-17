@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/16 18:53:48 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 10:21:58 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,10 @@ $ sudo tcpdump -i lo -> to capture local ping packets
 $ vagrant rsync-auto -> to synchronize folder
 
 The default is to wait for one second between each packet normally
+
+TODO: google ttl=63 ??
+TODO: google host resolve -> par21s12-in-f4.1e100.net
+TODO: time formatting
 
 */
 

@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/16 19:10:15 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 11:00:18 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,31 @@ void debug_packet(t_packet packet)
 	printf("%s\n", packet.msg);
 }
 
+void print_time(unsigned int sec, unsigned int usec)
+{
+	long long ms = sec*1000 + usec/1000;
+	int nbr = 100;
+
+	if (sec) {
+		ft_putnbr(sec);
+		ft_putstr(".");
+	}
+	ft_putnbr(ms);
+	if (!ms) {
+		ft_putchar('.');
+		while (nbr > 1) {
+			if (!(usec / nbr))
+				ft_putchar('0');
+			nbr /= 100;
+		}
+		ft_putnbr(usec);
+	}
+	else if (ms < 100) {
+		ft_putchar('.');
+		ft_putnbr((usec-1000)*0.1);
+	}
+}
+
 void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start_time)
 {
 	struct timeval end_time;
@@ -107,10 +132,8 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 	ft_putstr(" ttl=");
 	ft_putnbr(g_data.ttl);
 	ft_putstr(" time=");
-	ft_putnbr(sec);
-	ft_putstr(".");
-	ft_putnbr(msec);
-	ft_putstr("ms");
+	print_time(sec, msec);
+	ft_putstr(" ms");
 	ft_putchar('\n');
 }
 
@@ -156,6 +179,9 @@ void process_packet()
 	/* Preparing receiver */
 	receiver_len = sizeof(receiver);
 
+	/* Prepare timer */
+	gettimeofday(&start_time, NULL); /* TODO: CHECK RET FOR TIMEOFDAY */
+
 	/* debug_packet(packet); */
 	if (sendto(g_data.sockfd,
 				&packet,
@@ -168,9 +194,6 @@ void process_packet()
 	}
 	else
 		g_data.sent++;
-
-	/* Prepare timer */
-	gettimeofday(&start_time, NULL); /* TODO: CHECK RET FOR TIMEOFDAY */
 
 	if (recvfrom(g_data.sockfd,
 				&packet,
