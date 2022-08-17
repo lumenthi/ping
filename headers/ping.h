@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 10:21:58 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 13:51:07 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,8 +128,33 @@ $ vagrant rsync-auto -> to synchronize folder
 The default is to wait for one second between each packet normally
 
 TODO: google ttl=63 ??
-TODO: google host resolve -> par21s12-in-f4.1e100.net
+TODO: goole DNS resolve -> par21s12-in-f4.1e100.net # NOT MANDATORY
+TODO: Multiple args # NOT MANDATORY
 TODO: time formatting
+
+TODO:
+
+sudo ./ft_ping 69.162.81.155
+64 bytes from 69.162.81.155 (69.162.81.155): icmp_seq=5 ttl=64 time=110 ms
+64 bytes from 69.162.81.155 (69.162.81.155): icmp_seq=6 ttl=64 time=1.4295077 ms ???
+
+start sec: 1660730435, start usec: 965108
+end sec:   1660730436, end usec:   75830
+64 bytes from 69.162.81.155 (69.162.81.155): icmp_seq=5 ttl=64 time=1.4295078 ms
+
+64 bytes from 69.162.81.155 (69.162.81.155): icmp_seq=1 ttl=64 time=ms: 4295077, sec: 1, usec: -889549
+1.4295077 ms
+
+64 bytes from www.google.com (172.217.22.132): icmp_seq=17 ttl=64 time=2.109 ms ????
+
+vagrant@stretch:/vagrant$ sudo ./ft_ping 95.142.107.181
+PING 95.142.107.181 (95.142.107.181) 56(84) bytes of data.
+64 bytes from 95.142.107.181 (95.142.107.181): icmp_seq=1 ttl=64 time=ms: 9, ms2: 4294975, sec: 1, usec: -991322
+9.42939759 ms
+
+ADDRESSES:
+69.162.81.155 -> 110ms
+95.142.107.181 -> 8.90ms
 
 */
 

@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 11:00:18 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/17 13:57:36 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,12 +88,29 @@ void debug_packet(t_packet packet)
 	printf("%s\n", packet.msg);
 }
 
-void print_time(unsigned int sec, unsigned int usec)
+void print_time(long long ms, unsigned int sec, unsigned int usec)
 {
-	long long ms = sec*1000 + usec/1000;
 	int nbr = 100;
+	long long ms2 = sec*1000 + usec/1000;
 
-	if (sec) {
+	/*ft_putstr("ms: ");
+	ft_putnbr(ms);
+
+	ft_putstr(", ms2: ");
+	ft_putnbr(ms2);
+
+	ft_putstr(", sec: ");
+	ft_putnbr(sec);
+
+	ft_putstr(", usec: ");
+	ft_putnbr(usec);
+
+	ft_putchar('\n');*/
+
+	if (ms2 < ms)
+		ms = ms2;
+
+	if (sec && usec > 0 && ms2 < ms) {
 		ft_putnbr(sec);
 		ft_putstr(".");
 	}
@@ -108,8 +125,17 @@ void print_time(unsigned int sec, unsigned int usec)
 		ft_putnbr(usec);
 	}
 	else if (ms < 100) {
+		while (usec > 1000)
+			usec-=1000;
 		ft_putchar('.');
-		ft_putnbr((usec-1000)*0.1);
+		nbr = 10;
+		usec = usec*0.1;
+		while (nbr > 1) {
+			if (!(usec / nbr))
+				ft_putchar('0');
+			nbr /= 10;
+		}
+		ft_putnbr(usec);
 	}
 }
 
@@ -119,8 +145,24 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 
 	gettimeofday(&end_time, NULL);
 
+	/* ft_putstr("start sec: ");
+	ft_putnbr(start_time.tv_sec);
+	ft_putstr(", start usec: ");
+	ft_putnbr(start_time.tv_usec);
+
+	ft_putstr("end sec: ");
+	ft_putnbr(end_time.tv_sec);
+	ft_putstr(", end usec: ");
+	ft_putnbr(end_time.tv_usec);
+	ft_putchar('\n'); */
+
 	int sec = end_time.tv_sec - start_time.tv_sec;
 	int msec = end_time.tv_usec - start_time.tv_usec;
+
+	long long start_ms = start_time.tv_sec*1000 + start_time.tv_usec/1000;
+	long long end_ms = end_time.tv_sec*1000 + end_time.tv_usec/1000;
+
+	long long ms = end_ms - start_ms;
 
 	ft_putnbr(sizeof(packet));
 	ft_putstr(" bytes from ");
@@ -132,7 +174,7 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 	ft_putstr(" ttl=");
 	ft_putnbr(g_data.ttl);
 	ft_putstr(" time=");
-	print_time(sec, msec);
+	print_time(ms, sec, msec);
 	ft_putstr(" ms");
 	ft_putchar('\n');
 }
@@ -150,10 +192,14 @@ void print_end()
 {
 	struct timeval end_time;
 	gettimeofday(&end_time, NULL);
-	unsigned int diff = end_time.tv_usec - g_data.start_time.tv_usec;
+
+	long long start_ms = g_data.start_time.tv_sec*1000 + g_data.start_time.tv_usec/1000;
+	long long end_ms = end_time.tv_sec*1000 + end_time.tv_usec/1000;
+
+	long long diff = end_ms - start_ms;
 
 	printf("\n--- %s ping statistics ---\n", g_data.address);
-	printf("%d packets transmitted, %d received, %d%c packet loss, time %dms\n",
+	printf("%d packets transmitted, %d received, %d%c packet loss, time %lldms\n",
 		g_data.sent, g_data.rec,
 		(g_data.sent-g_data.rec) / g_data.rec, '%', diff);
 }
@@ -166,7 +212,7 @@ void process_packet()
 	struct timeval	start_time;
 
 	/* For debug */
-	if (g_data.seq > 2)
+	if (g_data.seq > 500)
 		inthandler(2);
 
 	/* Formatting packet header */
