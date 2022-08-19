@@ -105,4 +105,4 @@ re: fclean # Make -j support
 	@ $(MAKE) all
 
 run: all
-	@ vagrant ssh -- -t -f 'sudo /vagrant/$(NAME) localhost'
+	@ sudo ./$(NAME) localhost

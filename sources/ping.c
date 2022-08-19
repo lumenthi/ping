@@ -88,25 +88,11 @@ void debug_packet(t_packet packet)
 	printf("%s\n", packet.msg);
 }
 
-void print_time(long long ms, unsigned int sec, unsigned int usec)
+void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 {
 	int nbr = 100;
 	long long ms2 = sec*1000 + usec/1000;
 	int zeroes = 2;
-
-	/*ft_putstr("ms: ");
-	ft_putnbr(ms);
-
-	ft_putstr(", ms2: ");
-	ft_putnbr(ms2);
-
-	ft_putstr(", sec: ");
-	ft_putnbr(sec);
-
-	ft_putstr(", usec: ");
-	ft_putnbr(usec);
-
-	ft_putchar('\n');*/
 
 	if (ms2 < ms)
 		ms = ms2;
@@ -125,9 +111,9 @@ void print_time(long long ms, unsigned int sec, unsigned int usec)
 		}
 		ft_putnbr(usec);
 	}
-	else if (ms < 100) {
-		while (usec > 1000)
-			usec-=1000;
+	while (usec >= 1000)
+		usec-=1000;
+	if (ms && ms < 100) {
 		ft_putchar('.');
 		nbr = 10;
 		usec = ms > 9 ? usec*0.01 : usec*0.1;
@@ -143,8 +129,31 @@ void print_time(long long ms, unsigned int sec, unsigned int usec)
 			ft_putchar('0');
 			zeroes--;
 		}
-		ft_putnbr(usec);
+		if (usec)
+			ft_putnbr(usec);
 	}
+	/* RTT min / max */
+	if ((g_data.min.timeval.tv_usec == 0 && g_data.min.ms == 0) ||
+		ms < g_data.min.ms ||
+		(ms == g_data.min.ms && usec < g_data.min.timeval.tv_usec))
+	{
+		g_data.min.timeval.tv_sec = sec;
+		g_data.min.timeval.tv_usec = usec;
+		g_data.min.ms = ms;
+	}
+	if ((g_data.max.timeval.tv_usec == 0 && g_data.max.ms == 0) ||
+		ms > g_data.max.ms ||
+		(ms == g_data.max.ms && usec > g_data.max.timeval.tv_usec))
+	{
+		g_data.max.timeval.tv_sec = sec;
+		g_data.max.timeval.tv_usec = usec;
+		g_data.max.ms = ms;
+	}
+	/* RTT average */
+	g_data.total.timeval.tv_usec += usec;
+	g_data.total.ms += ms;
+	if (g_data.total.timeval.tv_usec / 1000)
+		g_data.total.timeval.tv_usec /= 1000;
 }
 
 void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start_time)
@@ -182,7 +191,7 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 	ft_putstr(" ttl=");
 	ft_putnbr(g_data.ttl);
 	ft_putstr(" time=");
-	print_time(ms, sec, msec);
+	print_packet_time(ms, sec, msec);
 	ft_putstr(" ms");
 	ft_putchar('\n');
 }
@@ -196,15 +205,56 @@ void print_begin()
 	ft_putstr(") 56(84) bytes of data.\n");
 }
 
+void print_rtt_time(unsigned int ms, unsigned int usec)
+{
+	int nbr = 100;
+	int zeroes = 3;
+
+	while (usec >= 1000)
+		usec -= 1000;
+	ft_putnbr(ms);
+	ft_putchar('.');
+	while (nbr) {
+		if (!(usec / nbr))
+			zeroes++;
+		zeroes--;
+		nbr /= 10;
+	}
+	while (zeroes > 0) {
+		ft_putchar('0');
+		zeroes--;
+	}
+	if (usec)
+		ft_putnbr(usec);
+}
+
+void print_rtt_avg()
+{
+	unsigned int total_usec = g_data.total.ms*1000+g_data.total.timeval.tv_usec;
+	double average_usec = (float)total_usec/(float)g_data.rec;
+
+	print_rtt_time(average_usec/1000, (unsigned int)average_usec%1000);
+}
+
 void print_rtt()
 {
-	float min = 0.5;
-	float max = 0.5;
-	float avg = 0.5;
-	float mdev = 0.5;
+	ft_putstr("rtt min/avg/max/mdev = ");
 
-	printf("rtt min/avg/max/mdev = %.6f/%.6f/%.6f/%.6f ms\n",
-	min, avg, max, mdev);
+	/* min */
+	print_rtt_time(g_data.min.ms, g_data.min.timeval.tv_usec);
+	ft_putchar('/');
+
+	/* avg */
+	print_rtt_avg();
+	ft_putchar('/');
+
+	/* max */
+	print_rtt_time(g_data.max.ms, g_data.max.timeval.tv_usec);
+	ft_putchar('/');
+
+	/* mdev */
+	print_rtt_time(0, 0);;
+	ft_putstr(" ms\n");
 }
 
 void print_end()
@@ -305,6 +355,20 @@ void ping_loop()
 	g_data.seq = 0;
 	g_data.rec = 0;
 	g_data.sent = 0;
+
+	/* max */
+	g_data.min.timeval.tv_sec = 0;
+	g_data.min.timeval.tv_usec = 0;
+	g_data.min.ms = 0;
+	/* min */
+	g_data.max.timeval.tv_sec = 0;
+	g_data.max.timeval.tv_usec = 0;
+	g_data.max.ms = 0;
+	/* average */
+	g_data.total.timeval.tv_sec = 0;
+	g_data.total.timeval.tv_usec = 0;
+	g_data.total.ms = 0;
+
 	signal(SIGALRM, alarmhandler);
 	signal(SIGINT, inthandler);
 

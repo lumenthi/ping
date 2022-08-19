@@ -62,6 +62,11 @@ struct in_addr {
 };
 */
 
+typedef struct s_time {
+	struct timeval timeval;
+	unsigned int ms;
+}	t_time;
+
 typedef struct	s_data {
 	uint8_t args;
 	char *path;
@@ -76,6 +81,10 @@ typedef struct	s_data {
 	unsigned int rec;
 	int sockfd;
 	int ttl;
+	/* RTT related */
+	t_time min;
+	t_time max;
+	t_time total;
 }	t_data;
 
 /* global */
