@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/17 17:42:44 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/20 11:19:36 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,12 +94,23 @@ typedef struct	s_data {
 extern t_data g_data;
 
 /* signal.c */
-void inthandler(int sig);
-void alarmhandler(int sig);
+void	inthandler(int sig);
+void	alarmhandler(int sig);
 
 /* ping.c */
-void process_packet();
-void print_end();
+void	print_end();
+int		ft_ping(char *address);
+
+/* packet.c */
+void	process_packet();
+
+/* rtt.c */
+void	print_rtt();
+
+/* display.c */
+int		print_help();
+void	print_end();
+void	print_begin();
 
 /* Packets */
 #include <netinet/ip_icmp.h>

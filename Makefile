@@ -6,7 +6,7 @@
 #    By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/12/22 14:06:43 by lumenthi          #+#    #+#              #
-#    Updated: 2022/08/16 14:37:12 by lumenthi         ###   ########.fr        #
+#    Updated: 2022/08/20 11:19:55 by lumenthi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -51,7 +51,11 @@ HEADERS = $(addprefix $(HEADDIR)/, $(HEADS))
 ###### SOURCES ######
 
 SRCS = ping.c \
-	signal.c
+	signal.c \
+	packet.c \
+	rtt.c \
+	main.c \
+	display.c
 
 SOURCES = $(addprefix $(SRCDIR)/, $(SRCS))
 
