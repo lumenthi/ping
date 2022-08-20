@@ -94,27 +94,35 @@ void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 	long long ms2 = sec*1000 + usec/1000;
 	int zeroes = 2;
 
+
 	if (ms2 < ms)
 		ms = ms2;
 
-	if (sec && usec > 0 && ms2 < ms) {
+
+	if (sec && usec > 0 && ms2 < ms && !(ARGS_F)) {
 		ft_putnbr(sec);
 		ft_putstr(".");
 	}
-	ft_putnbr(ms);
+	if (!(ARGS_F))
+		ft_putnbr(ms);
 	if (!ms) {
-		ft_putchar('.');
+		if (!(ARGS_F))
+			ft_putchar('.');
 		while (nbr > 1) {
-			if (!(usec / nbr))
-				ft_putchar('0');
+			if (!(usec / nbr)) {
+				if (!(ARGS_F))
+					ft_putchar('0');
+			}
 			nbr /= 100;
 		}
-		ft_putnbr(usec);
+		if (!(ARGS_F))
+			ft_putnbr(usec);
 	}
 	while (usec >= 1000)
 		usec-=1000;
 	if (ms && ms < 100) {
-		ft_putchar('.');
+		if (!(ARGS_F))
+			ft_putchar('.');
 		nbr = 10;
 		usec = ms > 9 ? usec*0.01 : usec*0.1;
 		while (nbr) {
@@ -126,11 +134,14 @@ void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 		if (usec == 0)
 			zeroes -= 1;
 		while (zeroes > 0) {
-			ft_putchar('0');
+			if (!(ARGS_F))
+				ft_putchar('0');
 			zeroes--;
 		}
-		if (usec)
-			ft_putnbr(usec);
+		if (usec) {
+			if (!(ARGS_F))
+				ft_putnbr(usec);
+		}
 	}
 	/* RTT min / max */
 	if ((g_data.min.timeval.tv_usec == 0 && g_data.min.ms == 0) ||
@@ -161,7 +172,6 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 	struct timeval end_time;
 
 	gettimeofday(&end_time, NULL);
-
 	/* ft_putstr("start sec: ");
 	ft_putnbr(start_time.tv_sec);
 	ft_putstr(", start usec: ");
@@ -174,26 +184,32 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 	ft_putchar('\n'); */
 
 	int sec = end_time.tv_sec - start_time.tv_sec;
-	int msec = end_time.tv_usec - start_time.tv_usec;
+	int usec = end_time.tv_usec - start_time.tv_usec;
 
 	long long start_ms = start_time.tv_sec*1000 + start_time.tv_usec/1000;
 	long long end_ms = end_time.tv_sec*1000 + end_time.tv_usec/1000;
 
 	long long ms = end_ms - start_ms;
 
-	ft_putnbr(sizeof(packet));
-	ft_putstr(" bytes from ");
-	ft_putstr(g_data.address);
-	ft_putstr(" (");
-	ft_putstr(g_data.ipv4);
-	ft_putstr("): icmp_seq=");
-	ft_putnbr(packet_nbr);
-	ft_putstr(" ttl=");
-	ft_putnbr(g_data.ttl);
-	ft_putstr(" time=");
-	print_packet_time(ms, sec, msec);
-	ft_putstr(" ms");
-	ft_putchar('\n');
+	//printf("start_ms: %lld, end_ms: %lld, ms: %lld\n", start_ms, end_ms, ms);
+
+	if (!(ARGS_F)) {
+		ft_putnbr(sizeof(packet));
+		ft_putstr(" bytes from ");
+		ft_putstr(g_data.address);
+		ft_putstr(" (");
+		ft_putstr(g_data.ipv4);
+		ft_putstr("): icmp_seq=");
+		ft_putnbr(packet_nbr);
+		ft_putstr(" ttl=");
+		ft_putnbr(g_data.ttl);
+		ft_putstr(" time=");
+	}
+	print_packet_time(ms, sec, usec);
+	if (!(ARGS_F)) {
+		ft_putstr(" ms");
+		ft_putchar('\n');
+	}
 }
 
 void print_begin()
@@ -232,13 +248,19 @@ void print_rtt_avg()
 {
 	unsigned int total_usec = g_data.total.ms*1000+g_data.total.timeval.tv_usec;
 	double average_usec = (float)total_usec/(float)g_data.rec;
+	double usec = (unsigned int)average_usec % 1000;
 
-	print_rtt_time(average_usec/1000, (unsigned int)average_usec%1000);
+	if (!usec) {
+		usec = average_usec;
+		while ((usec / 1) < 1)
+			usec*=10;
+	}
+	print_rtt_time(average_usec/1000, usec);
 }
 
 void print_rtt()
 {
-	ft_putstr("rtt min/avg/max/mdev = ");
+	ft_putstr("rtt min/avg/max = ");
 
 	/* min */
 	print_rtt_time(g_data.min.ms, g_data.min.timeval.tv_usec);
@@ -250,20 +272,16 @@ void print_rtt()
 
 	/* max */
 	print_rtt_time(g_data.max.ms, g_data.max.timeval.tv_usec);
-	ft_putchar('/');
 
-	/* mdev */
-	print_rtt_time(0, 0);;
 	ft_putstr(" ms\n");
 }
 
 void print_end()
 {
-	struct timeval end_time;
-	gettimeofday(&end_time, NULL);
+	gettimeofday(&g_data.end_time, NULL);
 
 	long long start_ms = g_data.start_time.tv_sec*1000 + g_data.start_time.tv_usec/1000;
-	long long end_ms = end_time.tv_sec*1000 + end_time.tv_usec/1000;
+	long long end_ms = g_data.end_time.tv_sec*1000 + g_data.end_time.tv_usec/1000;
 
 	long long diff = end_ms - start_ms;
 
@@ -299,10 +317,6 @@ void process_packet()
 	socklen_t		receiver_len;
 	struct timeval	start_time;
 	int				received;
-
-	/* For debug */
-	if (g_data.seq > 500)
-		inthandler(2);
 
 	/* Set our receive flag to 0 */
 	received = 0;
@@ -347,7 +361,9 @@ void process_packet()
 	}
 	if (received)
 		print_packet(packet, g_data.seq, start_time);
-	alarm(1);
+	if (!(ARGS_F))
+		alarm(1);
+	return;
 }
 
 void ping_loop()
@@ -379,7 +395,10 @@ void ping_loop()
 		printf("%s: Starting the ping loop...\n", g_data.path);
 	print_begin();
 	process_packet();
-	while (1);
+	while (1) {
+		if (ARGS_F)
+			process_packet();
+	}
 }
 
 int print_help()
@@ -465,6 +484,8 @@ void	get_args(int argc, char **argv, uint8_t *args)
 					(*args) |= 0x01; // 0000 0001
 				else if (argv[i][j] == 'h')
 					(*args) |= 0x02; // 0000 0010
+				else if (argv[i][j] == 'f')
+					(*args) |= 0x04; // 0000 0100
 				j++;
 			}
 		}

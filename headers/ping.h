@@ -75,6 +75,7 @@ typedef struct	s_data {
 	struct addrinfo *host_info;
 	struct sockaddr *host_addr;
 	struct timeval start_time;
+	struct timeval end_time;
 	char *address;
 	unsigned int seq;
 	unsigned int sent;
@@ -132,6 +133,7 @@ typedef struct s_packet
 
 # define ARGS_V g_data.args & 0x01
 # define ARGS_H g_data.args & 0x02
+# define ARGS_F g_data.args & 0x04
 
 /* NOTES:
 
@@ -151,13 +153,36 @@ ADDRESSES:
 152.99.1.10 -> Timeout
 
 
-TODO: RTT line
+TODO: RTT line -> bonus
 64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.022 ms
 64 bytes from localhost (127.0.0.1): icmp_seq=2 ttl=64 time=0.046 ms
 ^C
 --- localhost ping statistics ---
 2 packets transmitted, 2 received, 0% packet loss, time 1030ms
 rtt min/avg/max/mdev = 0.022/0.034/0.046/0.012 ms <--- This line
+
+Round-trip time (RTT) is the duration, measured in milliseconds, from when a browser sends a request to when it receives a response from a server
+
+(FQDN) Fully qualified domain name
+
+mdev:       tsum += triptime;
+            tsum2 += (long long)triptime * (long long)triptime
+            tsum /= nreceived + nrepeats;
+            tsum2 /= nreceived + nrepeats;
+            tmdev = llsqrt(tsum2 - tsum * tsum);
+
+-f flood ping
+-i interval
+-q
+RTT line
+-t ttl
+
+➜  ping git:(master) ✗ sudo ./ft_ping localhost -f
+PING localhost (127.0.0.1) 56(84) bytes of data.
+^C
+--- localhost ping statistics ---
+602897 packets transmitted, 602897 received, 0% packet loss, time 1347ms
+rtt min/avg/max = 0.001/0.002/6.045 ms ???
 
 */
 
