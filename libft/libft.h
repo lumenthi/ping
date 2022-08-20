@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/11/11 10:50:56 by lumenthi          #+#    #+#             */
-/*   Updated: 2020/01/17 13:02:52 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/20 09:40:28 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,5 +98,6 @@ char			*ft_strjoinl(char *s1, char *s2);
 void			ft_putaddress(void *addr);
 void			ft_exit(const char *msg);
 void			ft_puthex(int zero, int caps, size_t input);
+int				ft_strisnum(char *str);
 
 #endif

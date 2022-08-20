@@ -515,6 +515,10 @@ int		get_args(int argc, char **argv, uint8_t *args)
 					(*args) |= 0x20; // 0010 0000
 					if (i+1 < argc) {
 						next = 1;
+						if (!ft_strisnum(argv[i+1])) {
+							fprintf(stderr, "%s: bad timing interval\n", argv[0]);
+							return -1;
+						}
 						g_data.interval = ft_atoi(argv[i+1]);
 					}
 				}
@@ -536,6 +540,9 @@ int main(int argc, char **argv)
 	g_data.interval = 1;
 
 	destination = get_args(argc, argv, &g_data.args);
+
+	if (destination == -1)
+		return 1;
 
 	if (argc < 2 || !destination) {
 		fprintf(stderr, "%s: usage error: Destination address required\n", argv[0]);
