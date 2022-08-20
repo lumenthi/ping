@@ -24,7 +24,7 @@ static struct addrinfo *resolve(char *host)
 	hints.ai_family = AF_INET;
 
 	/* subject to any restrictions imposed by hints */
-	if (getaddrinfo(host, NULL, &hints, &res) == -1)
+	if (getaddrinfo(host, NULL, &hints, &res) != 0)
 		return NULL;
 
 	return res;
