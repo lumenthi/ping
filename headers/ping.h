@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 11:19:36 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/20 13:24:16 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,6 +209,14 @@ vagrant@stretch:/vagrant$ sudo ping www.google.com -t 0 -4
 ping: can't set unicast time-to-live: Invalid argument
 
 From 192.168.106.2 (192.168.106.2) icmp_seq=1 Time to live exceeded
+
+ bytes from 127.0.0.1 (127.0.0.1): icmp_seq=18052 ttl=64 ti^C
+--- 127.0.0.1 ping statistics ---
+18052 packets transmitted, 18052 received, 0% packet loss, time 1869ms
+rtt min/avg/max = 0.002/total_usec: 256, average_usec: 0.014181, usec: 0.000000
+0.001/0.146 ms
+
+total_usec: 256, average_usec: 0.014181, usec: 0.000000
 
 */
 

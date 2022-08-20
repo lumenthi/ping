@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 11:10:34 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/20 13:26:40 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 	}
 	float mult = (float)nbr / (float)100;
 	if (ms && mult) {
-		usec*= mult;
+		usec *= mult;
 		if (!(ARGS_F) && !(ARGS_Q))
 			ft_putchar('.');
 		while (zeroes > 0) {

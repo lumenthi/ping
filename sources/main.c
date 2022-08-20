@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:15:03 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 11:15:18 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/20 11:23:48 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,10 +68,8 @@ int main(int argc, char **argv)
 	g_data.interval = 1;
 
 	destination = get_args(argc, argv, &g_data.args);
-
 	if (destination == -1)
 		return 1;
-
 	if (argc < 2 || !destination) {
 		fprintf(stderr, "%s: usage error: Destination address required\n", argv[0]);
 		return 1;

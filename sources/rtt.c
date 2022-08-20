@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:11:47 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 11:12:44 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/20 13:40:02 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ static void print_rtt_time(unsigned int ms, unsigned int usec)
 static void print_rtt_avg()
 {
 	unsigned int total_usec = g_data.total.ms*1000+g_data.total.timeval.tv_usec;
+	unsigned int min_usec = g_data.min.ms*1000+g_data.min.timeval.tv_usec;
 	double average_usec = (float)total_usec/(float)g_data.rec;
 	double usec = (unsigned int)average_usec % 1000;
 
@@ -46,6 +47,7 @@ static void print_rtt_avg()
 		while ((usec / 1) < 1)
 			usec*=10;
 	}
+	usec = usec < min_usec ? min_usec : usec;
 	print_rtt_time(average_usec/1000, usec);
 }
 
