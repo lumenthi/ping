@@ -82,6 +82,7 @@ typedef struct	s_data {
 	unsigned int rec;
 	int sockfd;
 	int ttl;
+	int count;
 	/* RTT related */
 	t_time min;
 	t_time max;
@@ -134,6 +135,8 @@ typedef struct s_packet
 # define ARGS_V g_data.args & 0x01
 # define ARGS_H g_data.args & 0x02
 # define ARGS_F g_data.args & 0x04
+# define ARGS_C g_data.args & 0x08
+# define ARGS_Q g_data.args & 0x10
 
 /* NOTES:
 
@@ -171,11 +174,12 @@ mdev:       tsum += triptime;
             tsum2 /= nreceived + nrepeats;
             tmdev = llsqrt(tsum2 - tsum * tsum);
 
--f flood ping
 -i interval
--q
-RTT line
--t ttl
+
+-q quiet output | DONE
+-f flood ping | DONE
+-c count | DONE
+-RTT | WIP
 
 ➜  ping git:(master) ✗ sudo ./ft_ping localhost -f
 PING localhost (127.0.0.1) 56(84) bytes of data.
@@ -183,6 +187,14 @@ PING localhost (127.0.0.1) 56(84) bytes of data.
 --- localhost ping statistics ---
 602897 packets transmitted, 602897 received, 0% packet loss, time 1347ms
 rtt min/avg/max = 0.001/0.002/6.045 ms ???
+
+vagrant plugin install vagrant-disksize
+vagrant rsync-auto
+
+vagrant@stretch:/vagrant$ sudo ping www.google.com -t 0 -4
+ping: can't set unicast time-to-live: Invalid argument
+
+From 192.168.106.2 (192.168.106.2) icmp_seq=1 Time to live exceeded
 
 */
 

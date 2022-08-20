@@ -99,29 +99,29 @@ void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 		ms = ms2;
 
 
-	if (sec && usec > 0 && ms2 < ms && !(ARGS_F)) {
+	if (sec && usec > 0 && ms2 < ms && !(ARGS_F) && !(ARGS_Q)) {
 		ft_putnbr(sec);
 		ft_putstr(".");
 	}
-	if (!(ARGS_F))
+	if (!(ARGS_F) && !(ARGS_Q))
 		ft_putnbr(ms);
 	if (!ms) {
-		if (!(ARGS_F))
+		if (!(ARGS_F) && !(ARGS_Q))
 			ft_putchar('.');
 		while (nbr > 1) {
 			if (!(usec / nbr)) {
-				if (!(ARGS_F))
+				if (!(ARGS_F) && !(ARGS_Q))
 					ft_putchar('0');
 			}
 			nbr /= 100;
 		}
-		if (!(ARGS_F))
+		if (!(ARGS_F) && !(ARGS_Q))
 			ft_putnbr(usec);
 	}
 	while (usec >= 1000)
 		usec-=1000;
 	if (ms && ms < 100) {
-		if (!(ARGS_F))
+		if (!(ARGS_F) && !(ARGS_Q))
 			ft_putchar('.');
 		nbr = 10;
 		usec = ms > 9 ? usec*0.01 : usec*0.1;
@@ -134,12 +134,12 @@ void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 		if (usec == 0)
 			zeroes -= 1;
 		while (zeroes > 0) {
-			if (!(ARGS_F))
+			if (!(ARGS_F) && !(ARGS_Q))
 				ft_putchar('0');
 			zeroes--;
 		}
 		if (usec) {
-			if (!(ARGS_F))
+			if (!(ARGS_F) && !(ARGS_Q))
 				ft_putnbr(usec);
 		}
 	}
@@ -193,7 +193,7 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 
 	//printf("start_ms: %lld, end_ms: %lld, ms: %lld\n", start_ms, end_ms, ms);
 
-	if (!(ARGS_F)) {
+	if (!(ARGS_F) && !(ARGS_Q)) {
 		ft_putnbr(sizeof(packet));
 		ft_putstr(" bytes from ");
 		ft_putstr(g_data.address);
@@ -206,7 +206,7 @@ void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start
 		ft_putstr(" time=");
 	}
 	print_packet_time(ms, sec, usec);
-	if (!(ARGS_F)) {
+	if (!(ARGS_F) && !(ARGS_Q)) {
 		ft_putstr(" ms");
 		ft_putchar('\n');
 	}
@@ -318,6 +318,10 @@ void process_packet()
 	struct timeval	start_time;
 	int				received;
 
+	/* Count */
+	if (ARGS_C && g_data.seq >= (unsigned int)g_data.count)
+		inthandler(2);
+
 	/* Set our receive flag to 0 */
 	received = 0;
 
@@ -344,8 +348,11 @@ void process_packet()
 	{
 		fprintf(stderr, "Failed to send packet\n");
 	}
-	else
+	else {
+		if (ARGS_F)
+			ft_putchar('.');
 		g_data.sent++;
+	}
 
 	if (recvfrom(g_data.sockfd,
 				&packet,
@@ -356,6 +363,8 @@ void process_packet()
 	{
 	}
 	else {
+		if (ARGS_F)
+			ft_putstr("\b \b");
 		received = 1;
 		g_data.rec++;
 	}
@@ -425,6 +434,11 @@ int ft_ping(char *address)
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 
+	if (ARGS_C && g_data.count <= 0) {
+		fprintf(stderr, "%s: %s: bad number of packets to transmit.\n", g_data.path, address);
+		return 1;
+	}
+
 	g_data.address = address;
 	/* Socket creation RAW/DGRAM ? */
 	if (ARGS_V)
@@ -471,12 +485,15 @@ int ft_ping(char *address)
 	return 0;
 }
 
-void	get_args(int argc, char **argv, uint8_t *args)
+int		get_args(int argc, char **argv, uint8_t *args)
 {
 	int i = 1;
 	int j = 0;
+	int ret = 0;
+	int next = 0;
 	*args = 0x00;
 	while (i < argc) {
+		next = 0;
 		if (argv[i] && argv[i][0] == '-') {
 			j = 0;
 			while (argv[i][j]) {
@@ -486,32 +503,41 @@ void	get_args(int argc, char **argv, uint8_t *args)
 					(*args) |= 0x02; // 0000 0010
 				else if (argv[i][j] == 'f')
 					(*args) |= 0x04; // 0000 0100
+				else if (argv[i][j] == 'c') {
+					(*args) |= 0x08; // 0000 1000
+					if (i+1 < argc) {
+						next = 1;
+						g_data.count = ft_atoi(argv[i+1]);
+					}
+				}
+				else if (argv[i][j] == 'q')
+					(*args) |= 0x10; // 0001 0000
 				j++;
 			}
 		}
-		i++;
+		else
+			ret = i;
+		i += next ? 2 : 1;
 	}
+	return ret;
 }
 
 int main(int argc, char **argv)
 {
-	int i = 1;
-	if (argc < 2) {
+	int destination = 0;
+
+	destination = get_args(argc, argv, &g_data.args);
+
+	if (argc < 2 || !destination) {
 		fprintf(stderr, "%s: usage error: Destination address required\n", argv[0]);
 		return 1;
 	}
-
-	get_args(argc, argv, &g_data.args);
 
 	if (ARGS_H)
 		return (print_help());
 
 	g_data.path = argv[0];
 
-	while (i < argc) {
-		if (argv[i] && argv[i][0] != '-')
-			ft_ping(argv[i]);
-		i++;
-	}
+	ft_ping(argv[destination]);
 	return 0;
 }
