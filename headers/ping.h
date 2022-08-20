@@ -83,6 +83,7 @@ typedef struct	s_data {
 	int sockfd;
 	int ttl;
 	int count;
+	int interval;
 	/* RTT related */
 	t_time min;
 	t_time max;
@@ -134,9 +135,11 @@ typedef struct s_packet
 
 # define ARGS_V g_data.args & 0x01
 # define ARGS_H g_data.args & 0x02
+
 # define ARGS_F g_data.args & 0x04
 # define ARGS_C g_data.args & 0x08
 # define ARGS_Q g_data.args & 0x10
+# define ARGS_I g_data.args & 0x20
 
 /* NOTES:
 

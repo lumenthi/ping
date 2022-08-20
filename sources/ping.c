@@ -94,10 +94,8 @@ void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 	long long ms2 = sec*1000 + usec/1000;
 	int zeroes = 2;
 
-
 	if (ms2 < ms)
 		ms = ms2;
-
 
 	if (sec && usec > 0 && ms2 < ms && !(ARGS_F) && !(ARGS_Q)) {
 		ft_putnbr(sec);
@@ -113,35 +111,31 @@ void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 				if (!(ARGS_F) && !(ARGS_Q))
 					ft_putchar('0');
 			}
-			nbr /= 100;
+			nbr /= 10;
 		}
 		if (!(ARGS_F) && !(ARGS_Q))
 			ft_putnbr(usec);
 	}
 	while (usec >= 1000)
 		usec-=1000;
-	if (ms && ms < 100) {
+	int tmp = ms;
+	while (tmp) {
+		nbr /= 10;
+		tmp /= 10;
+		zeroes--;
+	}
+	float mult = (float)nbr / (float)100;
+	if (ms && mult) {
+		usec*= mult;
 		if (!(ARGS_F) && !(ARGS_Q))
 			ft_putchar('.');
-		nbr = 10;
-		usec = ms > 9 ? usec*0.01 : usec*0.1;
-		while (nbr) {
-			if (!(usec / nbr))
-				zeroes++;
-			zeroes--;
-			nbr /= 10;
-		}
-		if (usec == 0)
-			zeroes -= 1;
 		while (zeroes > 0) {
 			if (!(ARGS_F) && !(ARGS_Q))
 				ft_putchar('0');
 			zeroes--;
 		}
-		if (usec) {
-			if (!(ARGS_F) && !(ARGS_Q))
-				ft_putnbr(usec);
-		}
+		if (!(ARGS_F) && !(ARGS_Q))
+			ft_putnbr(usec);
 	}
 	/* RTT min / max */
 	if ((g_data.min.timeval.tv_usec == 0 && g_data.min.ms == 0) ||
@@ -370,8 +364,8 @@ void process_packet()
 	}
 	if (received)
 		print_packet(packet, g_data.seq, start_time);
-	if (!(ARGS_F))
-		alarm(1);
+	if (!(ARGS_F) && g_data.interval > 0)
+		alarm(g_data.interval);
 	return;
 }
 
@@ -405,7 +399,7 @@ void ping_loop()
 	print_begin();
 	process_packet();
 	while (1) {
-		if (ARGS_F)
+		if (ARGS_F || g_data.interval == 0)
 			process_packet();
 	}
 }
@@ -435,7 +429,12 @@ int ft_ping(char *address)
 	timeout.tv_usec = 0;
 
 	if (ARGS_C && g_data.count <= 0) {
-		fprintf(stderr, "%s: %s: bad number of packets to transmit.\n", g_data.path, address);
+		fprintf(stderr, "%s: %s: bad number of packets to transmit\n", g_data.path, address);
+		return 1;
+	}
+
+	if (ARGS_I && g_data.interval < 0) {
+		fprintf(stderr, "%s: %s: bad timing interval\n", g_data.path, address);
 		return 1;
 	}
 
@@ -512,6 +511,13 @@ int		get_args(int argc, char **argv, uint8_t *args)
 				}
 				else if (argv[i][j] == 'q')
 					(*args) |= 0x10; // 0001 0000
+				else if (argv[i][j] == 'i') {
+					(*args) |= 0x20; // 0010 0000
+					if (i+1 < argc) {
+						next = 1;
+						g_data.interval = ft_atoi(argv[i+1]);
+					}
+				}
 				j++;
 			}
 		}
@@ -525,6 +531,9 @@ int		get_args(int argc, char **argv, uint8_t *args)
 int main(int argc, char **argv)
 {
 	int destination = 0;
+
+	/* Default ping interval */
+	g_data.interval = 1;
 
 	destination = get_args(argc, argv, &g_data.args);
 
