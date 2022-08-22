@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:15:03 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 11:23:48 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/22 16:10:18 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,11 @@ static int		get_args(int argc, char **argv, uint8_t *args)
 			while (argv[i][j]) {
 				if (argv[i][j] == 'v')
 					(*args) |= 0x01; // 0000 0001
-				else if (argv[i][j] == 'h')
+				else if (argv[i][j] == 'h') {
 					(*args) |= 0x02; // 0000 0010
+					print_help();
+					return -1;
+				}
 				else if (argv[i][j] == 'f')
 					(*args) |= 0x04; // 0000 0100
 				else if (argv[i][j] == 'c') {

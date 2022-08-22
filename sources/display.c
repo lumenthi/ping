@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:17:41 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 11:18:25 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/22 16:16:34 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,11 @@ int print_help()
 		"  ping [options] <destination>\n\n"
 		"Options:\n"
 		"  <destination>      dns name or ip address\n"
+		"  -c <count>         stop after <count> replies\n"
+		"  -f                 flood ping\n"
 		"  -h                 print help and exit\n"
-		"  -v                 verbose output\n"
-		"  IPv4 options:\n"
-		"  -4                 use IPv4\n"
-		"  IPv6 options:\n"
-		"  -6                 use IPv6\n");
+		"  -i <interval>      seconds between sending each packet\n"
+		"  -q                 quiet output\n"
+		"  -v                 verbose output\n");
 	return 0;
 }
