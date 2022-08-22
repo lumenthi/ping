@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/22 16:44:52 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/22 16:57:57 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,8 @@ int ft_ping(char *address)
 		printf("%s: Gathering informations about host...\n", g_data.path);
 	if (host_informations(g_data.host_info)) {
 		fprintf(stderr, "%s: %s: Failed to get informations about the host\n", g_data.path, address);
+		if (ARGS_V)
+			printf("%s: Freeing addrinfo structure...\n", g_data.path);
 		freeaddrinfo(g_data.host_info);
 		return 1;
 	}
@@ -132,6 +134,8 @@ int ft_ping(char *address)
 		printf("%s: Setting TTL option to %d...\n", g_data.path, g_data.ttl);
 	if (setsockopt(g_data.sockfd, IPPROTO_IP, IP_TTL, &g_data.ttl, sizeof(g_data.ttl)) != 0) {
 		fprintf(stderr, "%s: %s: Failed to set TTL option\n", g_data.path, address);
+		if (ARGS_V)
+			printf("%s: Freeing addrinfo structure...\n", g_data.path);
 		freeaddrinfo(g_data.host_info);
 		return 1;
 	}
@@ -140,6 +144,8 @@ int ft_ping(char *address)
 		printf("%s: Setting timeout option to %ld...\n", g_data.path, timeout.tv_sec);
 	if (setsockopt(g_data.sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) != 0) {
 		fprintf(stderr, "%s: %s: Failed to set timeout option\n", g_data.path, address);
+		if (ARGS_V)
+			printf("%s: Freeing addrinfo structure...\n", g_data.path);
 		freeaddrinfo(g_data.host_info);
 		return 1;
 	}
