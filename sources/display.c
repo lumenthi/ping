@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:17:41 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/22 16:16:34 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/22 16:37:57 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,10 @@ void print_begin()
 
 void print_end()
 {
-	gettimeofday(&g_data.end_time, NULL);
+	if ((gettimeofday(&g_data.end_time, NULL)) < 0) {
+		g_data.end_time.tv_sec = 1;
+		g_data.end_time.tv_usec = 1;
+	}
 
 	long long start_ms = g_data.start_time.tv_sec*1000 + g_data.start_time.tv_usec/1000;
 	long long end_ms = g_data.end_time.tv_sec*1000 + g_data.end_time.tv_usec/1000;

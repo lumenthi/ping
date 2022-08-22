@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 11:18:28 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/22 16:44:52 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,10 @@ void ping_loop()
 
 	if (ARGS_V)
 		printf("%s: Capturing start time...\n", g_data.path);
-	gettimeofday(&(g_data.start_time), NULL);
+	if ((gettimeofday(&(g_data.start_time), NULL)) < 0) {
+		g_data.start_time.tv_sec = 1;
+		g_data.start_time.tv_usec = 1;
+	}
 	if (ARGS_V)
 		printf("%s: Starting the ping loop...\n", g_data.path);
 	print_begin();

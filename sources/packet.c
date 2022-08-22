@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/20 13:26:40 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/22 16:42:23 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,10 @@ static void print_packet(t_packet packet, unsigned int packet_nbr, struct timeva
 {
 	struct timeval end_time;
 
-	gettimeofday(&end_time, NULL);
+	if ((gettimeofday(&end_time, NULL)) < 0) {
+		end_time.tv_sec = 1;
+		end_time.tv_usec = 1;
+	}
 
 	int sec = end_time.tv_sec - start_time.tv_sec;
 	int usec = end_time.tv_usec - start_time.tv_usec;
@@ -171,7 +174,10 @@ void process_packet()
 	receiver_len = sizeof(receiver);
 
 	/* Prepare timer */
-	gettimeofday(&start_time, NULL); /* TODO: CHECK RET FOR TIMEOFDAY */
+	if ((gettimeofday(&start_time, NULL)) < 0) {
+		start_time.tv_sec = 1;
+		start_time.tv_usec = 1;
+	}
 
 	/* debug_packet(packet); */
 	if (sendto(g_data.sockfd,
