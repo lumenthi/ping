@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/22 16:42:23 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 07:26:21 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ static void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 	}
 	while (usec >= 1000)
 		usec-=1000;
+	unsigned int usec_r = usec;
 	int tmp = ms;
 	while (tmp) {
 		nbr /= 10;
@@ -64,25 +65,27 @@ static void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 	/* RTT min / max */
 	if ((g_data.min.timeval.tv_usec == 0 && g_data.min.ms == 0) ||
 		ms < g_data.min.ms ||
-		(ms == g_data.min.ms && usec < g_data.min.timeval.tv_usec))
+		(ms == g_data.min.ms && usec_r < g_data.min.timeval.tv_usec))
 	{
 		g_data.min.timeval.tv_sec = sec;
-		g_data.min.timeval.tv_usec = usec;
+		g_data.min.timeval.tv_usec = usec_r;
 		g_data.min.ms = ms;
 	}
 	if ((g_data.max.timeval.tv_usec == 0 && g_data.max.ms == 0) ||
 		ms > g_data.max.ms ||
-		(ms == g_data.max.ms && usec > g_data.max.timeval.tv_usec))
+		(ms == g_data.max.ms && usec_r > g_data.max.timeval.tv_usec))
 	{
 		g_data.max.timeval.tv_sec = sec;
-		g_data.max.timeval.tv_usec = usec;
+		g_data.max.timeval.tv_usec = usec_r;
 		g_data.max.ms = ms;
 	}
 	/* RTT average */
-	g_data.total.timeval.tv_usec += usec;
+	g_data.total.timeval.tv_usec += usec_r;
 	g_data.total.ms += ms;
-	if (g_data.total.timeval.tv_usec / 1000)
+	if (g_data.total.timeval.tv_usec / 1000) {
+		g_data.total.ms+=1;
 		g_data.total.timeval.tv_usec /= 1000;
+	}
 }
 
 static void print_packet(t_packet packet, unsigned int packet_nbr, struct timeval start_time)
