@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 11:01:49 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:47:48 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,7 @@ typedef struct s_packet
 # define ARGS_C g_data.args & 0x08
 # define ARGS_Q g_data.args & 0x10
 # define ARGS_I g_data.args & 0x20
+# define ARGS_T g_data.args & 0x40
 
 /* NOTES:
 
@@ -174,6 +175,7 @@ The default is to wait for one second between each packet normally
 -q quiet output | DONE
 -f flood ping | DONE
 -c count | DONE
+-t ttl | DONE
 -RTT | DONE
 
 vagrant plugin install vagrant-disksize

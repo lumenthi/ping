@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:17:41 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 11:03:20 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:49:55 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ int print_help()
 		"  -h                 print help and exit\n"
 		"  -i <interval>      seconds between sending each packet\n"
 		"  -q                 quiet output\n"
+		"  -t <ttl>           set time to live\n"
 		"  -v                 verbose output\n");
 	return 0;
 }

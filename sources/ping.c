@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 11:06:46 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:14:57 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,12 +87,15 @@ void ping_loop()
 
 int ft_ping(char *address)
 {
-	/* default TTL */
-	g_data.ttl = 64;
 	/* default timeout (seconds) */
 	struct timeval timeout;
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
+
+	if (ARGS_T && g_data.ttl <= 0) {
+		fprintf(stderr, "%s: %s: can't set unicast time-to-live\n", g_data.path, address);
+		return 1;
+	}
 
 	if (ARGS_C && g_data.count <= 0) {
 		fprintf(stderr, "%s: %s: bad number of packets to transmit\n", g_data.path, address);

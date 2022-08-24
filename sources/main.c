@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:15:03 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/22 16:10:18 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:14:10 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,13 @@ static int		get_args(int argc, char **argv, uint8_t *args)
 						g_data.interval = ft_atoi(argv[i+1]);
 					}
 				}
+				else if (argv[i][j] == 't') {
+					(*args) |= 0x40; // 0100 0000
+					if (i+1 < argc) {
+						next = 1;
+						g_data.ttl = ft_atoi(argv[i+1]);
+					}
+				}
 				j++;
 			}
 		}
@@ -69,6 +76,9 @@ int main(int argc, char **argv)
 
 	/* Default ping interval */
 	g_data.interval = 1;
+
+	/* Default TTL */
+	g_data.ttl = 64;
 
 	destination = get_args(argc, argv, &g_data.args);
 	if (destination == -1)
