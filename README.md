@@ -71,11 +71,15 @@ sendto(g_data.sockfd, &packet, sizeof(packet), 0, g_data.host_addr, sizeof(*(g_d
 ```
 - Wait for reply
 ```C
-recvfrom(g_data.sockfd, &packet, sizeof(packet), 0, &receiver,&receiver_len)
+recvmsg(g_data.sockfd, &msg, 0)
+```
+- Check validity of the packet
+```C
+if (ret.hdr.type == ICMP_ECHOREPLY)
 ```
 - Print the packet
 ```C
-print_packet(packet, g_data.seq, start_time);
+print_packet(ret, g_data.seq, start_time);
 ```
 ### End of the loop (CTRL-C pressed or -c option specified)
 - Print summary
@@ -94,6 +98,7 @@ Implemented options:
 -h              print help and exit.
 -i <interval>   seconds between sending each packet.
 -q              quiet output.
+-t <ttl>        set time to live.
 -v              verbose output.
 RTT             round trip time, min, max, average.
 ```
