@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/22 16:29:30 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:01:49 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ typedef struct	s_data {
 	unsigned int seq;
 	unsigned int sent;
 	unsigned int rec;
+	unsigned int error;
 	int sockfd;
 	int ttl;
 	int count;
@@ -104,6 +105,23 @@ void	print_rtt();
 int		print_help();
 void	print_end();
 void	print_begin();
+
+/* Message */
+/*
+struct iovec {                    Scatter/gather array items
+    void  *iov_base;              Starting address
+    size_t iov_len;               Number of bytes to transfer
+};
+
+struct msghdr {
+    void         *msg_name;       optional address
+    socklen_t     msg_namelen;    size of address
+    struct iovec *msg_iov;        scatter/gather array
+    size_t        msg_iovlen;     # elements in msg_iov
+    void         *msg_control;    ancillary data, see below
+    size_t        msg_controllen; ancillary data buffer len
+    int           msg_flags;      flags on received message
+}; */
 
 /* Packets */
 #include <netinet/ip_icmp.h>

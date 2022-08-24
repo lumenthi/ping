@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:17:41 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/22 16:37:57 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:03:20 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,11 @@ void print_end()
 	ft_putstr(" packets transmitted, ");
 	ft_putnbr(g_data.rec);
 	ft_putstr(" received, ");
+	if (g_data.error > 0) {
+		ft_putchar('+');
+		ft_putnbr(g_data.error);
+		ft_putstr(" errors, ");
+	}
 	ft_putnbr(average);
 	ft_putstr("% packet loss, time ");
 	ft_putnbr(diff);

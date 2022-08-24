@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/22 16:57:57 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:06:46 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void ping_loop()
 {
 	g_data.seq = 0;
 	g_data.rec = 0;
+	g_data.error = 0;
 	g_data.sent = 0;
 
 	/* max */

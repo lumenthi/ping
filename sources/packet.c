@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 07:26:21 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:01:35 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,10 @@ static void print_packet(t_packet packet, unsigned int packet_nbr, struct timeva
 		ft_putstr(g_data.ipv4);
 		ft_putstr("): icmp_seq=");
 		ft_putnbr(packet_nbr);
+		if (packet.hdr.type == 11) {
+			ft_putstr(" Time to live exceeded\n");
+			return ;
+		}
 		ft_putstr(" ttl=");
 		ft_putnbr(g_data.ttl);
 		ft_putstr(" time=");
@@ -154,10 +158,19 @@ static unsigned short checksum(void *b, int len)
 void process_packet()
 {
 	t_packet		packet;
-	struct sockaddr	receiver;
-	socklen_t		receiver_len;
 	struct timeval	start_time;
 	int				received;
+	struct msghdr	msg;
+	struct iovec	iov[1];
+	char			buf[sizeof(t_packet)+sizeof(struct iphdr)];
+	t_packet		ret;
+
+	/* Prepare ret */
+	ft_memset(&msg, 0, sizeof(msg));
+	msg.msg_iov = iov;
+	msg.msg_iovlen = 1;
+	iov[0].iov_base = buf;
+	iov[0].iov_len = sizeof(buf);
 
 	/* Count */
 	if (ARGS_C && g_data.seq >= (unsigned int)g_data.count)
@@ -173,16 +186,12 @@ void process_packet()
 	packet.hdr.un.echo.sequence = g_data.seq++;
 	packet.hdr.checksum = checksum(&packet, sizeof(packet));
 
-	/* Preparing receiver */
-	receiver_len = sizeof(receiver);
-
 	/* Prepare timer */
 	if ((gettimeofday(&start_time, NULL)) < 0) {
 		start_time.tv_sec = 1;
 		start_time.tv_usec = 1;
 	}
 
-	/* debug_packet(packet); */
 	if (sendto(g_data.sockfd,
 				&packet,
 				sizeof(packet),
@@ -198,22 +207,26 @@ void process_packet()
 		g_data.sent++;
 	}
 
-	if (recvfrom(g_data.sockfd,
-				&packet,
-				sizeof(packet),
-				0,
-				&receiver,
-				&receiver_len) <= 0 && g_data.seq > 0)
+	if (recvmsg(g_data.sockfd, &msg, 0) < 0 && g_data.seq > 0)
 	{
 	}
 	else {
-		if (ARGS_F)
-			ft_putstr("\b \b");
+		void *tmp = &buf;
+		ret = *(t_packet*)(tmp+sizeof(struct iphdr));
+		if (ret.hdr.type == ICMP_TIME_EXCEEDED) {
+			if (ARGS_F)
+				ft_putstr("\bE");
+			g_data.error++;
+		}
+		else if (ret.hdr.type == ICMP_ECHOREPLY) {
+			if (ARGS_F)
+				ft_putstr("\b \b");
+			g_data.rec++;
+		}
 		received = 1;
-		g_data.rec++;
 	}
 	if (received)
-		print_packet(packet, g_data.seq, start_time);
+		print_packet(ret, g_data.seq, start_time);
 	if (!(ARGS_F) && g_data.interval > 0)
 		alarm(g_data.interval);
 	return;
