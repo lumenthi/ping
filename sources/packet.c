@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/01 12:35:52 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/01 15:25:14 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ static void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 	unsigned int usec_r = usec;
 	int tmp = ms;
 	while (tmp) {
+		if (!(usec / nbr))
+			zeroes++;
 		nbr /= 10;
 		tmp /= 10;
 		zeroes--;
