@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/01 15:25:14 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/01 16:45:37 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,6 +216,7 @@ void process_packet()
 		else {
 			void *tmp = &buf;
 			ret = *(t_packet*)(tmp+sizeof(struct iphdr));
+			g_data.ttl = ((struct iphdr*)tmp)->ttl;
 			if (ret.hdr.type == ICMP_TIME_EXCEEDED) {
 				if (ARGS_F)
 					ft_putstr("\bE");
