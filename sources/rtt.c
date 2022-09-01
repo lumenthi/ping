@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:11:47 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 11:05:29 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/01 12:37:15 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ static void print_rtt_time(unsigned int ms, unsigned int usec)
 	int nbr = 100;
 	int zeroes = 3;
 
-	while (usec >= 1000)
-		usec -= 1000;
 	ft_putnbr(ms);
 	ft_putchar('.');
 	while (nbr) {
@@ -38,13 +36,13 @@ static void print_rtt_time(unsigned int ms, unsigned int usec)
 static void print_rtt_avg()
 {
 	unsigned int total_usec = g_data.total.ms*1000+g_data.total.timeval.tv_usec;
-	unsigned int min_usec = g_data.min.ms*1000+g_data.min.timeval.tv_usec;
-	double average_usec;
-	average_usec = g_data.rec == 0 ? 0:total_usec/g_data.rec;
-	double usec = average_usec;
+	if (g_data.rec > 0)
+		total_usec /= g_data.rec;
 
-	usec = (average_usec/1000) < 1 && usec < min_usec ? min_usec : usec;
-	print_rtt_time(average_usec/1000, usec);
+	unsigned int usec = total_usec;
+	while (usec >= 1000)
+		usec -= 1000;
+	print_rtt_time(total_usec/1000, total_usec%1000);
 }
 
 void print_rtt()

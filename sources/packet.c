@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 11:01:35 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/01 12:35:52 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ static void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 {
 	int nbr = 100;
 	long long ms2 = sec*1000 + usec/1000;
-	int zeroes = 2;
+	int zeroes = 1;
 
 	if (ms2 < ms)
 		ms = ms2;
@@ -83,8 +83,8 @@ static void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 	g_data.total.timeval.tv_usec += usec_r;
 	g_data.total.ms += ms;
 	if (g_data.total.timeval.tv_usec / 1000) {
-		g_data.total.ms+=1;
-		g_data.total.timeval.tv_usec /= 1000;
+		g_data.total.ms++;
+		g_data.total.timeval.tv_usec %= 1000;
 	}
 }
 
@@ -207,26 +207,28 @@ void process_packet()
 		g_data.sent++;
 	}
 
-	if (recvmsg(g_data.sockfd, &msg, 0) < 0 && g_data.seq > 0)
-	{
-	}
-	else {
-		void *tmp = &buf;
-		ret = *(t_packet*)(tmp+sizeof(struct iphdr));
-		if (ret.hdr.type == ICMP_TIME_EXCEEDED) {
-			if (ARGS_F)
-				ft_putstr("\bE");
-			g_data.error++;
+	while (!received) {
+		if (recvmsg(g_data.sockfd, &msg, 0) < 0 && g_data.seq > 0)
+		{
 		}
-		else if (ret.hdr.type == ICMP_ECHOREPLY) {
-			if (ARGS_F)
-				ft_putstr("\b \b");
-			g_data.rec++;
+		else {
+			void *tmp = &buf;
+			ret = *(t_packet*)(tmp+sizeof(struct iphdr));
+			if (ret.hdr.type == ICMP_TIME_EXCEEDED) {
+				if (ARGS_F)
+					ft_putstr("\bE");
+				g_data.error++;
+			}
+			else if (ret.hdr.type == ICMP_ECHOREPLY) {
+				if (ARGS_F)
+					ft_putstr("\b \b");
+				g_data.rec++;
+			}
+			if (ret.hdr.type != ICMP_ECHO)
+				received = 1;
 		}
-		received = 1;
 	}
-	if (received)
-		print_packet(ret, g_data.seq, start_time);
+	print_packet(ret, g_data.seq, start_time);
 	if (!(ARGS_F) && g_data.interval > 0)
 		alarm(g_data.interval);
 	return;
