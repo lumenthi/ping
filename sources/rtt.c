@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:11:47 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/02 15:07:07 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/02 15:23:15 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,20 +60,16 @@ static long llsqrt(long long a)
 	return (long)x;
 }
 
-static void print_rtt_mdev(long long tsum, long long tsum2, unsigned int nreceived,
-					unsigned int nrepeats)
+static void print_rtt_mdev(long long tsum, long long tsum2, unsigned int count)
 {
 	double tmdev;
-	long total = nreceived + nrepeats;
-	total = total == 0 ? 1: total;
+	count = count == 0 ? 1: count;
 	long long tmvar;
 
-	tmvar = (tsum2 - ((tsum * tsum) / total)) / total;
-	// tmvar = (rts->tsum2 / total) - (tmavg * tmavg);
+	tmvar = (tsum2 - ((tsum * tsum) / count)) / count;
 
 	tmdev = llsqrt(tmvar);
 
-	//printf("mdev: %ld.%03ld", (long)tmdev/1000, (long)tmdev%1000);
 	print_rtt_time((long)tmdev/1000, (long)tmdev%1000);
 }
 
@@ -96,7 +92,7 @@ void print_rtt()
 	ft_putchar('/');
 
 	/* mdev */
-	print_rtt_mdev(g_data.tsum, g_data.tsum2, g_data.rec, g_data.sent);
+	print_rtt_mdev(g_data.tsum, g_data.tsum2, g_data.rec);
 
 	ft_putstr(" ms\n");
 }
