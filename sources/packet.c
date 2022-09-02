@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/01 17:18:31 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/02 14:54:25 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,13 @@ static void print_packet(t_packet packet, unsigned int packet_nbr, struct timeva
 		end_time.tv_usec = 1;
 	}
 
-	int sec = end_time.tv_sec - start_time.tv_sec;
-	int usec = end_time.tv_usec - start_time.tv_usec;
+	long int sec = end_time.tv_sec - start_time.tv_sec;
+	long int usec = end_time.tv_usec - start_time.tv_usec;
+
+	long triptime = sec * 1000000 + usec;
+
+	g_data.tsum += triptime;
+	g_data.tsum2 += (double)((long long)triptime * (long long)triptime);
 
 	long long start_ms = start_time.tv_sec*1000 + start_time.tv_usec/1000;
 	long long end_ms = end_time.tv_sec*1000 + end_time.tv_usec/1000;
@@ -113,9 +118,12 @@ static void print_packet(t_packet packet, unsigned int packet_nbr, struct timeva
 		ft_putnbr(sizeof(packet));
 		ft_putstr(" bytes from ");
 		ft_putstr(g_data.address);
-		ft_putstr(" (");
-		ft_putstr(g_data.ipv4);
-		ft_putstr("): icmp_seq=");
+		if (g_data.resolved) {
+			ft_putstr(" (");
+			ft_putstr(g_data.ipv4);
+			ft_putstr(")");
+		}
+		ft_putstr(": icmp_seq=");
 		ft_putnbr(packet_nbr);
 		if (packet.hdr.type == 11) {
 			ft_putstr(" Time to live exceeded\n");

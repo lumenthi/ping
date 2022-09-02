@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 11:47:48 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:37:02 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <limits.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/time.h>
@@ -74,6 +75,9 @@ typedef struct	s_data {
 	unsigned int sent;
 	unsigned int rec;
 	unsigned int error;
+	long long tsum;
+	long long tsum2;
+	int resolved;
 	int sockfd;
 	int ttl;
 	int count;
@@ -180,6 +184,15 @@ The default is to wait for one second between each packet normally
 
 vagrant plugin install vagrant-disksize
 vagrant rsync-auto
+
+tsum += triptime;
+tsum2 += (long long)triptime * (long long)triptime
+
+tsum /= nreceived + nrepeats;
+tsum2 /= nreceived + nrepeats;
+tmdev = llsqrt(tsum2 - tsum * tsum);
+
+(long)tmdev / 1000, (long)tmdev % 1000
 
 */
 

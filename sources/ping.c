@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/08/24 11:14:57 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/02 11:47:03 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,26 @@ static int host_informations(struct addrinfo *ret)
 	return 0;
 }
 
+static int is_fqdn(char *address)
+{
+	int i = 0;
+	while (address[i]) {
+		if (!ft_isdigit(address[i]) && address[i] != '.')
+			return 1;
+		i++;
+	}
+	return 0;
+}
+
 void ping_loop()
 {
 	g_data.seq = 0;
 	g_data.rec = 0;
 	g_data.error = 0;
 	g_data.sent = 0;
+
+	/* check if path is an address */
+	g_data.resolved = is_fqdn(g_data.address);
 
 	/* max */
 	g_data.min.timeval.tv_sec = 0;
@@ -65,6 +79,9 @@ void ping_loop()
 	g_data.total.timeval.tv_sec = 0;
 	g_data.total.timeval.tv_usec = 0;
 	g_data.total.ms = 0;
+	/* tsum */
+	g_data.tsum = 0;
+	g_data.tsum2 = 0;
 
 	signal(SIGALRM, alarmhandler);
 	signal(SIGINT, inthandler);
