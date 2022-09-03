@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/03 14:54:30 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/03 16:07:52 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,20 +209,22 @@ void process_packet()
 		start_time.tv_usec = 1;
 	}
 
+	if (ARGS_F)
+		ft_putchar('.');
 	if (sendto(g_data.sockfd,
 				&packet,
 				sizeof(packet),
 				0,
 				g_data.host_addr,
 				sizeof(*(g_data.host_addr))) <= 0) {
-		fprintf(stderr, "Failed to send packet\n");
 		if (ARGS_F)
 			ft_putstr("\bE");
+		if (!(ARGS_F) && !(ARGS_Q))
+			fprintf(stderr, "Failed to send packet\n");
+
 		g_data.error++;
 	}
 	else {
-		if (ARGS_F)
-			ft_putchar('.');
 		g_data.sent++;
 		while (echo_req) {
 			if (recvmsg(g_data.sockfd, &msg, 0) < 0 && g_data.seq > 0) {
