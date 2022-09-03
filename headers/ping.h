@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:05:31 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/02 12:37:02 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/03 12:03:35 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/time.h>
+#include <netinet/ip_icmp.h>
 
 /*
 struct addrinfo {
@@ -88,9 +89,6 @@ typedef struct	s_data {
 	t_time total;
 }	t_data;
 
-/* global */
-extern t_data g_data;
-
 /* signal.c */
 void	inthandler(int sig);
 void	alarmhandler(int sig);
@@ -125,11 +123,35 @@ struct msghdr {
     void         *msg_control;    ancillary data, see below
     size_t        msg_controllen; ancillary data buffer len
     int           msg_flags;      flags on received message
-}; */
+};
+*/
 
-/* Packets */
-#include <netinet/ip_icmp.h>
+/* ip */
+/*
+struct iphdr
+{
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    unsigned int ihl:4;
+    unsigned int version:4;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    unsigned int version:4;
+    unsigned int ihl:4;
+#else
+# error        "Please fix <bits/endian.h>"
+#endif
+    u_int8_t tos;
+    u_int16_t tot_len;
+    u_int16_t id;
+    u_int16_t frag_off;
+    u_int8_t ttl;
+    u_int8_t protocol;
+    u_int16_t check;
+    u_int32_t saddr;
+    u_int32_t daddr;
+};
+*/
 
+/* icmp */
 /*
 struct icmphdr
 {
@@ -153,10 +175,9 @@ struct icmphdr
 };
 */
 
-typedef struct s_packet
-{
+typedef struct s_packet {
 	struct icmphdr hdr;
-	char msg[64-sizeof(struct icmphdr)]; /* Define dynamically */
+	char msg[64-sizeof(struct icmphdr)];
 }	t_packet;
 
 # define ARGS_V g_data.args & 0x01
@@ -168,32 +189,7 @@ typedef struct s_packet
 # define ARGS_I g_data.args & 0x20
 # define ARGS_T g_data.args & 0x40
 
-/* NOTES:
-
-$ sudo tcpdump ip proto -> to capture ping packets
-$ sudo tcpdump -i lo -> to capture local ping packets
-
-The default is to wait for one second between each packet normally
-
--i interval | DONE
--q quiet output | DONE
--f flood ping | DONE
--c count | DONE
--t ttl | DONE
--RTT | DONE
-
-vagrant plugin install vagrant-disksize
-vagrant rsync-auto
-
-tsum += triptime;
-tsum2 += (long long)triptime * (long long)triptime
-
-tsum /= nreceived + nrepeats;
-tsum2 /= nreceived + nrepeats;
-tmdev = llsqrt(tsum2 - tsum * tsum);
-
-(long)tmdev / 1000, (long)tmdev % 1000
-
-*/
+/* global */
+extern t_data g_data;
 
 #endif

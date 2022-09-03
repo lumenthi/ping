@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/02 14:54:25 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/03 14:01:47 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ static void print_packet_time(long long ms, unsigned int sec, unsigned int usec)
 		usec-=1000;
 	unsigned int usec_r = usec;
 	int tmp = ms;
-	while (tmp) {
+	while (tmp && nbr) {
 		if (!(usec / nbr))
 			zeroes++;
 		nbr /= 10;
@@ -115,8 +115,12 @@ static void print_packet(t_packet packet, unsigned int packet_nbr, struct timeva
 	long long ms = end_ms - start_ms;
 
 	if (!(ARGS_F) && !(ARGS_Q)) {
-		ft_putnbr(sizeof(packet));
-		ft_putstr(" bytes from ");
+		if (packet.hdr.type == 11)
+			ft_putstr("From ");
+		else {
+				ft_putnbr(sizeof(packet));
+				ft_putstr(" bytes from ");
+		}
 		ft_putstr(g_data.address);
 		if (g_data.resolved) {
 			ft_putstr(" (");
@@ -171,8 +175,9 @@ void process_packet()
 {
 	t_packet		packet;
 	struct timeval	start_time;
-	int				received;
 	struct msghdr	msg;
+	int				recv;
+	int				echo_req;
 	struct iovec	iov[1];
 	char			buf[sizeof(t_packet)+sizeof(struct iphdr)];
 	t_packet		ret;
@@ -184,18 +189,18 @@ void process_packet()
 	iov[0].iov_base = buf;
 	iov[0].iov_len = sizeof(buf);
 
+	echo_req = 1;
+	recv = 1;
+
 	/* Count */
 	if (ARGS_C && g_data.seq >= (unsigned int)g_data.count)
 		inthandler(2);
-
-	/* Set our receive flag to 0 */
-	received = 0;
 
 	/* Formatting packet header */
 	ft_memset(&packet, 0, sizeof(packet));
 	packet.hdr.type = ICMP_ECHO;
 	packet.hdr.un.echo.id = getpid();
-	packet.hdr.un.echo.sequence = g_data.seq++;
+	packet.hdr.un.echo.sequence = g_data.seq;
 	packet.hdr.checksum = checksum(&packet, sizeof(packet));
 
 	/* Prepare timer */
@@ -209,39 +214,48 @@ void process_packet()
 				sizeof(packet),
 				0,
 				g_data.host_addr,
-				sizeof(*(g_data.host_addr))) <= 0)
-	{
+				sizeof(*(g_data.host_addr))) <= 0) {
 		fprintf(stderr, "Failed to send packet\n");
+		if (ARGS_F)
+			ft_putstr("\bE");
+		g_data.error++;
 	}
 	else {
 		if (ARGS_F)
 			ft_putchar('.');
 		g_data.sent++;
-	}
-
-	while (!received) {
-		if (recvmsg(g_data.sockfd, &msg, 0) < 0 && g_data.seq > 0)
-		{
-		}
-		else {
-			void *tmp = &buf;
-			ret = *(t_packet*)(tmp+sizeof(struct iphdr));
-			g_data.ttl = ((struct iphdr*)tmp)->ttl;
-			if (ret.hdr.type == ICMP_TIME_EXCEEDED) {
+		while (echo_req) {
+			if (recvmsg(g_data.sockfd, &msg, 0) < 0 && g_data.seq > 0) {
 				if (ARGS_F)
 					ft_putstr("\bE");
 				g_data.error++;
+				recv = 0;
+				break;
 			}
-			else if (ret.hdr.type == ICMP_ECHOREPLY) {
-				if (ARGS_F)
-					ft_putstr("\b \b");
-				g_data.rec++;
+			else {
+				void *tmp = &buf;
+				ret = *(t_packet*)(tmp+sizeof(struct iphdr));
+				g_data.ttl = ((struct iphdr*)tmp)->ttl;
+				//printf("retcode: %d\n", ret.hdr.type);
+				if (ret.hdr.type == ICMP_TIME_EXCEEDED) {
+					if (ARGS_F)
+						ft_putstr("\bE");
+					g_data.error++;
+				}
+				else if (ret.hdr.type == ICMP_ECHOREPLY) {
+					if (ARGS_F)
+						ft_putstr("\b \b");
+					g_data.rec++;
+				}
+				if (ret.hdr.type != ICMP_ECHO)
+					echo_req = 0;
 			}
-			if (ret.hdr.type != ICMP_ECHO)
-				received = 1;
+		}
+		if (recv) {
+			print_packet(ret, g_data.seq, start_time);
+			g_data.seq++;
 		}
 	}
-	print_packet(ret, g_data.seq, start_time);
 	if (!(ARGS_F) && g_data.interval > 0)
 		alarm(g_data.interval);
 	return;
