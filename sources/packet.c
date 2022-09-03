@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/03 16:07:52 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/03 16:30:05 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,7 +193,7 @@ void process_packet()
 	recv = 1;
 
 	/* Count */
-	if (ARGS_C && g_data.seq >= (unsigned int)g_data.count)
+	if (ARGS_C && g_data.seq > (unsigned int)g_data.count)
 		inthandler(2);
 
 	/* Formatting packet header */
