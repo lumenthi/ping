@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 11:05:20 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/03 14:01:47 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/03 14:54:30 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,18 +236,21 @@ void process_packet()
 				void *tmp = &buf;
 				ret = *(t_packet*)(tmp+sizeof(struct iphdr));
 				g_data.ttl = ((struct iphdr*)tmp)->ttl;
-				//printf("retcode: %d\n", ret.hdr.type);
 				if (ret.hdr.type == ICMP_TIME_EXCEEDED) {
 					if (ARGS_F)
 						ft_putstr("\bE");
 					g_data.error++;
+					echo_req = 0;
 				}
 				else if (ret.hdr.type == ICMP_ECHOREPLY) {
-					if (ARGS_F)
-						ft_putstr("\b \b");
-					g_data.rec++;
+					if (ret.hdr.un.echo.sequence == packet.hdr.un.echo.sequence) {
+						if (ARGS_F)
+							ft_putstr("\b \b");
+						g_data.rec++;
+						echo_req = 0;
+					}
 				}
-				if (ret.hdr.type != ICMP_ECHO)
+				else if (ret.hdr.type != ICMP_ECHO)
 					echo_req = 0;
 			}
 		}

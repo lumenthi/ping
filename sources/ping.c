@@ -6,7 +6,7 @@
 /*   By: lumenthi <lumenthi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 13:04:04 by lumenthi          #+#    #+#             */
-/*   Updated: 2022/09/02 11:47:03 by lumenthi         ###   ########.fr       */
+/*   Updated: 2022/09/03 14:47:31 by lumenthi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ static int is_fqdn(char *address)
 
 void ping_loop()
 {
-	g_data.seq = 0;
+	g_data.seq = 1;
 	g_data.rec = 0;
 	g_data.error = 0;
 	g_data.sent = 0;
